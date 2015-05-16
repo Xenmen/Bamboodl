@@ -42,7 +42,7 @@ Dependencies:
 Setup:
 	"pip3 install beautifulsoup4"
 Desc:
-	This application uses a local file with a list of urls
+	This application uses a local file with a list of urls to download those URLS and related media
 """
 
 
@@ -90,86 +90,8 @@ def bamboodl_run():
 
 if __name__ == '__main__':
 	bamboodl_run()
-	#deadthread_url = "https://8ch.net/4chon/res/13475.json"
-	#deadthread = download_text(deadthread_url)
-	#print(deadthread)
 
 	exit()
-	##
-	import re
-	##
-	line="https://boards.4chan.org/t/thread/651652\n"
-	line="http://mcsweezy.tumblr.com/\n"
-	json_test=""
-	domain = extract_root_domain_from_url(line)
-	print("DOMAIN IS:" + domain)
-	if domain in key_regex:
-		myregex = re.compile(key_regex[domain])
-		print("REGEX USED IS:" + key_regex[domain])
-		line_parsed = myregex.sub(key_reg_replace[domain], line)
-		print("PARSED LINE IS:" + line_parsed)
-		try:
-			json_test = json.loads(line_parsed)
-		except Exception as e:
-			print("WHOOPS there was an error!")
-			#raise e
-			#new_newsubs
-		
-	print("DONE")
-	print(json_test)
-	##
-	exit()
-	
-	# http://boards.4chan.org/t/thread/653630/studio-fow
-	# http://8ch.net/gamergatehq/res/31467.json
-	# http://8ch.net/th/res/273.html
-	#url="http://a.4cdn.org/t/thread/653630.json"
-	#url="http://8ch.net/gamergatehq/res/31467.json"
-	url="http://8ch.net/th/res/273.json"
-	resp=download_text(url)
-	#print(resp)
-	j_save("threadtest.json", json.loads(resp))
-
-	timestamp = time.time()
-	timestamp_header = time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.gmtime(timestamp))
-	headers={"If-Modified-Since": timestamp_header}
-	print(timestamp)
-
-	request.install_opener(request.build_opener(request.HTTPHandler))
-
-	parsed = ""
-	while parsed == "":
-		time.sleep(10)
-		print("Polling...")
-
-		mlrequest = request.Request(url, data=None, headers=headers, origin_req_host=None, unverifiable=False, method=None)
-		response = request.urlopen(mlrequest)
-
-		parsed = response.read().decode('utf-8')
-		print("Response is:")
-		#print(parsed)
-
-	#jthread = json.loads(download_text())
-	j_save("threadtest_updated.json", json.loads(parsed))
-
-	"""
-	myjson = bambootil.j_load("8ch_example.json")
-
-	post_standard = bambootil.post_8ch
-
-	for post in myjson['posts']:
-		#print(post[post_standard.poster_name] + " says:")
-		if post_standard.comment in post:
-			pass
-			#print("\t" + post[post_standard.comment])
-		else:
-			pass
-			#print("\t'no comment'")
-
-	#j_save("8out.json", myjson)
-	"""
-
-
 
 
 
