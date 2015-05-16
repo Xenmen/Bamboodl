@@ -2,13 +2,19 @@
 Bamboodl - The Culture Archiver
 ===============================
 
-This is Bamboodl, a tool for archiving 8Chan threads and more. You put thread URLs in a text file, run the script, and it adds them to your "Subscribed Threads" list. It downloads the threads' JSON, then grabs all the media (images, webms, pdfs, etc). 4Chan threads are also supported.
+This is Bamboodl, or "Bamboo DL"/"Bamboo Downloader", a tool for archiving 8Chan threads and more. You put thread URLs in a text file, run the script, and it adds them to your "Subscribed Threads" list. It downloads the threads' JSON, then grabs all the media (images, webms, pdfs, etc). 4Chan threads are also supported.
 
 There is a config file located at '~/_python/bamboodl' (~ being your user directory, C:/Users/&lt;name&gt; on Windows, /home/&lt;name&gt; on Linux, etc), where you can change the path threads are downloaded to. In the future, the config path will be changed to '~/.python/bamboodl', but since OSX makes it difficult to access hidden folders I'm holding off until I can add several more features to Bamboodl.
 
 By default, Bamboodl downloads threads to '~/bamboodl'. You can change that in the config file, 'bamboodl.json'.
 
 In the future, this project will include a 'thread browser'; an HTML file that you open, and use to browse your local archive as if it was a live imageboard.
+
+There is some additional information, and pictures, available at:
+
+http://daniel.tadeuszow.com/index.html#/projects/bamboodl
+
+This is the first public release, which I meant to do much earlier. Since a lot of people have asked for an 8Chan archiver, I'm sharing Bamboodl early, since it works quite well in its current state. Bamboodl will be compatible with Tumblr, Newgrounds, Deviantart, and many more sites, and have many more features, as I have time to implement them. Some sites (like Newgrounds) already work in my internal build, but the code is lousy, and needs cleanup before I share publically.
 
 I'm confused
 ============
