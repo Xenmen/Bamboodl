@@ -99,3 +99,12 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# =========================
+# Editor/IDE Files
+# =========================
+
+# Sublime Text
+# =========================
+
+*.sublime*
