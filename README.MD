@@ -16,6 +16,12 @@ http://daniel.tadeuszow.com/index.html#/projects/bamboodl
 
 This is the first public release, which I meant to do much earlier. Since a lot of people have asked for an 8Chan archiver, I'm sharing Bamboodl early, since it works quite well in its current state. Bamboodl will be compatible with Tumblr, Newgrounds, Deviantart, and many more sites, and have many more features, as I have time to implement them. Some sites (like Newgrounds) already work in my internal build, but the code is lousy, and needs cleanup before I share publically.
 
+Additionally, if you would like an archiver for 4Chan with more features than Bamboodl has presently, bibanon's is the best I know of:
+
+https://github.com/bibanon/BA-4chan-thread-archiver
+
+^It's capable of polling a thread continuously (one at a time per-instance) until it 404's. Bamboodl cannot yet do this, but when it gets a graphical interface, I can multithread Bamboodl and make real-time thread watching a reality.
+
 I'm confused
 ============
 
