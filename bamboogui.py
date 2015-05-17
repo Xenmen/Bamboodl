@@ -1,5 +1,12 @@
-#!/usr/bin/env python
+#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
 
+#Bamboodl GUI - a cultural archival tool
+#Copyright Daniel Tadeuszow
+#2015-05-15
+#License: AGPL3+
+
+#Code that follows is under QT's BSD license until I rewrite it
 
 #############################################################################
 ##
@@ -47,13 +54,6 @@ from PyQt5.QtWidgets import (QApplication, QComboBox, QDialog,
 		QLabel, QLineEdit, QMenu, QMenuBar, QPushButton, QSpinBox, QTextEdit,
 		QVBoxLayout)
 
-#! /usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-#Bamboodl - a cultural archival tool
-#Copyright Daniel Tadeuszow
-#2015-05-15
-#License: AGPL3+
 
 ##
 #Python STD
@@ -91,15 +91,10 @@ class Dialog(QDialog):
 
 		self.createMenu()
 
-		#SPECIAL
 		self.widget_register_url()
 		self.widget_download()
 		self.thread_download = threading.Thread( group=None, target=self.run_downloader, name=None, args=(), kwargs={}, daemon=True )
 		self.running = False
-
-		#self.createHorizontalGroupBox()
-		#self.createGridGroupBox()
-		#self.createFormGroupBox()
 
 		bigEditor = QTextEdit()
 		bigEditor.setPlainText("This widget takes up all the remaining space "
@@ -113,15 +108,9 @@ class Dialog(QDialog):
 		mainLayout = QVBoxLayout()
 		mainLayout.setMenuBar(self.menuBar)
 
-		#SPECIAL
 		mainLayout.addWidget(self.form_register_url)
 		mainLayout.addWidget(self.form_download_urls)
 
-		#mainLayout.addWidget(self.horizontalGroupBox)
-		#mainLayout.addWidget(self.gridGroupBox)
-		#mainLayout.addWidget(self.formGroupBox)
-		#mainLayout.addWidget(bigEditor)
-		#mainLayout.addWidget(buttonBox)
 		self.setLayout(mainLayout)
 
 		self.setWindowTitle("Bamboodl")
@@ -259,45 +248,6 @@ class Dialog(QDialog):
 	##
 	#Original Code
 	##
-
-	def createHorizontalGroupBox(self):
-		self.horizontalGroupBox = QGroupBox("Horizontal layout")
-		layout = QHBoxLayout()
-
-		for i in range(Dialog.NumButtons):
-			button = QPushButton("Button %d" % (i + 1))
-			layout.addWidget(button)
-
-		self.horizontalGroupBox.setLayout(layout)
-
-	def createGridGroupBox(self):
-		self.gridGroupBox = QGroupBox("Grid layout")
-		layout = QGridLayout()
-
-		for i in range(Dialog.NumGridRows):
-			label = QLabel("Line %d:" % (i + 1))
-			lineEdit = QLineEdit()
-			layout.addWidget(label, i + 1, 0)
-			layout.addWidget(lineEdit, i + 1, 1)
-
-		self.smallEditor = QTextEdit()
-		self.smallEditor.setPlainText("This widget takes up about two thirds "
-				"of the grid layout.")
-
-		layout.addWidget(self.smallEditor, 0, 2, 4, 1)
-
-		layout.setColumnStretch(1, 10)
-		layout.setColumnStretch(2, 20)
-		self.gridGroupBox.setLayout(layout)
-
-	def createFormGroupBox(self):
-		self.formGroupBox = QGroupBox("Form layout")
-		layout = QFormLayout()
-		layout.addRow(QLabel("Line 1:"), QLineEdit())
-		layout.addRow(QLabel("Line 2, long text:"), QComboBox())
-		layout.addRow(QLabel("Line 3:"), QSpinBox())
-		self.formGroupBox.setLayout(layout)
-
 
 if __name__ == '__main__':
 
