@@ -173,7 +173,9 @@ config_default = {
 #SUBSCRIPTIONS
 
 subscribe = {}
-subscribe_default = {}
+subscribe_default = {
+	'dead':[]
+}
 
 for domain in domains:
 	subscribe_default[domain]={}

@@ -61,12 +61,15 @@ def init_user_settings():
 	j_save(paths['path_conf'], config)
 
 def load_user_settings():
-	global paths, config
+	global paths, config, subscribe
 
 	if paths['path_conf'].exists():
 		config = j_load(paths['path_conf'])
 	else:
 		init_user_settings()
+
+	if 'dead' not in subscribe:
+		subscribe['dead'] = []
 
 ##
 #SUBSCRIPTIONS
