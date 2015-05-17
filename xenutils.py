@@ -125,8 +125,13 @@ def extract_domain_from_url(url):
 
 def extract_root_domain_from_url(url):
 
-	urlbits = extract_domain_from_url(url).split('.')
-	return urlbits[-2] + '.' + urlbits[-1]
+	try:
+		urlbits = extract_domain_from_url(url).split('.')
+		return urlbits[-2] + '.' + urlbits[-1]
+	except Exception as e:
+		print("Unable to parse domain")
+		return None
+		#raise e
 
 def download_text(url):
 	#if-modified-since header seems to be ignored

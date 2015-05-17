@@ -108,9 +108,9 @@ def add_json_to_subscribe(new_json):
 			subscribe[domain][board] = {}
 		if thread not in subscribe[domain][board]:
 			subscribe[domain][board][thread] = new_json
-			debug("Now subscribed to: " + new_json['url'])
+			return("Now subscribed to: " + new_json['url'])
 		else:
-			debug("URL already watched...")
+			return("URL already watched...")
 	#TODO
 	#elif domain == dom_tumblr or domain == dom_deviantart or domain == dom_newgrounds or domain == dom_furaffinity or domain == dom_inkbunny:
 	else:
@@ -119,13 +119,13 @@ def add_json_to_subscribe(new_json):
 			if 'tags' in new_json and new_json['tags'][0] == '':
 				new_json['tags'] = []
 			subscribe[domain][account] = new_json
-			debug("Now subscribed to: " + new_json['url'])
+			return("Now subscribed to: " + new_json['url'])
 		else:
 			if 'tags' in new_json and new_json['tags'][0] not in subscribe[domain][account]['tags']:
-				debug("URL already watched, but new tag added...")
 				subscribe[domain][account]['tags'].append(new_json['tags'][0])
+				return("URL already watched, but new tag added...")
 			else:
-				debug("URL and tags already watched...")
+				return("URL and tags already watched...")
 
 def load_newsubs():
 	global subscribe, paths, key_regex, key_reg_replace
@@ -163,7 +163,7 @@ def load_newsubs():
 							continue
 							#raise e
 							#new_newsubs
-						add_json_to_subscribe(json_test)
+						debug(add_json_to_subscribe(json_test))
 						#print(json_test)
 					else:
 						debug("Domain '" + domain + "' not yet handled: " + line.replace('\n',''))
@@ -180,7 +180,7 @@ def reprocess_the_dead():
 	global subscribe
 
 	while len(subscribe['dead']) > 0:
-		add_json_to_subscribe(subscribe['dead'].pop())
+		debug( add_json_to_subscribe(subscribe['dead'].pop()) )
 
 	save_subscribe_object()
 
@@ -574,6 +574,16 @@ def time_to_update(subscription):
 	else:
 		return False
 
+def watch_subscription_or_dont(subscription):
+	global total_json, skipped
+	
+	if time_to_update(subscription):
+		#print("Adding watched: " + subscription['url'])
+		total_json.append(subscription)
+	else:
+		#print("Skipping watched: " + subscription['url'])
+		skipped.append(subscription)
+
 def fetch_l1_json(domain):
 	global subscribe, total_json, skipped
 
@@ -586,16 +596,11 @@ def fetch_l1_json(domain):
 			skipped.append(subscription)
 
 def fetch_l2_json(domain, sublevel):
-	global subscribe, total_json, skipped
+	global subscribe
 
 	for item in subscribe[domain][sublevel]:
 		subscription=subscribe[domain][sublevel][item]
-		if time_to_update(subscription):
-			#print("Adding watched: " + subscription['url'])
-			total_json.append(subscription)
-		else:
-			#print("Skipping watched: " + subscription['url'])
-			skipped.append(subscription)
+		watch_subscription_or_dont(subscription)
 
 def check_everything():
 	global subscribe, total_json
@@ -620,6 +625,8 @@ def spawn_downloaders():
 	max_threads = 5
 
 	#total_json.extend(skipped)
+
+	threads = []
 
 	if len(total_json) < max_threads:
 		for x in range(0, len(total_json)):
