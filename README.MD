@@ -50,7 +50,7 @@ Bamboodl:
 
 - Uses 4chan's and 8chan's JSON interface, to put less strain on their networks and run faster
 
-Before a URL ends up in `subscribed.json`, you must either put it in `new.txt' or in the URL Register field in the graphical version and register it. Then, run the console version (`bamboodl.py`) or press 'Normal Download' in the graphical version, and it adds them to `subscribed.json`, which is your 'subscribed threads' list. It then downloads the threads' JSON, grabs all the media (images, webms, pdfs, etc), and updates the records in `subscribed.json`. 8chan and 4chan threads are currently supported.
+Before a URL ends up in `subscribed.json`, you must either put it in `new.txt` or in the URL Register field in the graphical version and register it. Then, run the console version (`bamboodl.py`) or press 'Normal Download' in the graphical version, and it adds them to `subscribed.json`, which is your 'subscribed threads' list. It then downloads the threads' JSON, grabs all the media (images, webms, pdfs, etc), and updates the records in `subscribed.json`. 8chan and 4chan threads are currently supported.
 
 Bamboodl knows better than to check every thread you're subscribed to every time you run it. Bamboodl records the last time each URL was checked, the last time a post/update was made, and the minimum time to wait until Bamboodl checks that URL again. Every time Bamboodl checks that URL, and there hasn't been an update, Bamboodl increases the amount of time it'll wait until it checks again. If there *has* been an update, it'll reset the wait time to the minimum amount. These wait times are currently per-domain, and you can check the times in 'bamboovar.py'.
 
