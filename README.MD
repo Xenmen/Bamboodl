@@ -2,7 +2,7 @@
 Bamboodl - The Culture Archiver
 ===============================
 
-This is Bamboodl, or "Bamboo DL"/"Bamboo Downloader", a tool for archiving 8Chan threads and more. You put thread URLs in a text file, run the script, and it adds them to your "Subscribed Threads" list. It downloads the threads' JSON, then grabs all the media (images, webms, pdfs, etc). 4Chan threads are also supported.
+This is Bamboodl, or "Bamboo DL"/"Bamboo Downloader", a tool for archiving 8chan threads and more. You put thread URLs in a text file, run the script, and it adds them to your "Subscribed Threads" list. It downloads the threads' JSON, then grabs all the media (images, webms, pdfs, etc). 4chan threads are also supported.
 
 There is a config file located at '~/_python/bamboodl' (~ being your user directory, C:/Users/&lt;name&gt; on Windows, /home/&lt;name&gt; on Linux, etc), where you can change the path threads are downloaded to. In the future, the config path will be changed to '~/.python/bamboodl', but since OSX makes it difficult to access hidden folders I'm holding off until I can add several more features to Bamboodl.
 
@@ -14,9 +14,9 @@ There is some additional information, and pictures, available at:
 
 http://daniel.tadeuszow.com/index.html#/projects/bamboodl
 
-This is the first public release, which I meant to do much earlier. Since a lot of people have asked for an 8Chan archiver, I'm sharing Bamboodl early, since it works quite well in its current state. Bamboodl will be compatible with Tumblr, Newgrounds, Deviantart, and many more sites, and have many more features, as I have time to implement them. Some sites (like Newgrounds) already work in my internal build, but the code is lousy, and needs cleanup before I share publically.
+This is the first public release, which I meant to do much earlier. Since a lot of people have asked for an 8chan archiver, I'm sharing Bamboodl early, since it works quite well in its current state. Bamboodl will be compatible with Tumblr, Newgrounds, Deviantart, and many more sites, and have many more features, as I have time to implement them. Some sites (like Newgrounds) already work in my internal build, but the code is lousy, and needs cleanup before I share publically.
 
-Additionally, if you would like an archiver for 4Chan with more features than Bamboodl has presently, bibanon's is the best I know of:
+Additionally, if you would like an archiver for 4chan with more features than Bamboodl has presently, bibanon's is the best I know of:
 
 https://github.com/bibanon/BA-4chan-thread-archiver
 
@@ -40,7 +40,7 @@ If you know what that means, then just run the following line in your console, a
 
 'pip3 install beautifulsoup4'
 
-If you don't know what Python or Pypi are, but you're still interested in archiving 8Chan threads, then here are some instructions for getting up to speed on Windows. I can write instructions for other platforms such as OSX if requested:
+If you don't know what Python or Pypi are, but you're still interested in archiving 8chan threads, then here are some instructions for getting up to speed on Windows. I can write instructions for other platforms such as OSX if requested:
 
 Visit this link and download Python 3.4, or higher: https://www.python.org/downloads/
 
@@ -96,7 +96,7 @@ Features and How It Works
 
 Bamboodl stores all URLs and their metadata in a json file, located at '~/_python/bamboodl/subscribed.json'.
 
-Bamboodl uses 4Chan's and 8Chan's JSON interface, to put less strain on their networks and run faster.
+Bamboodl uses 4chan's and 8chan's JSON interface, to put less strain on their networks and run faster.
 
 Bamboodl knows better than to check every thread you're subscribed to every time you run it. Bamboodl records the last time each URL was checked, the last time a post/update was made, and the minimum time to wait until Bamboodl checks that URL again. Every time Bamboodl checks that URL, and there hasn't been an update, Bamboodl increases the amount of time it'll wait until it checks again. If there *has* been an update, it'll reset the wait time to the minimum amount. These wait times are currently per-domain, and you can check the times in 'bamboovar.py'.
 
