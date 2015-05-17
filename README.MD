@@ -1,8 +1,11 @@
 
-#Graphical Version Released
+##Graphical Version Released
 
 Bamboodl now has a basic GUI using PyQT5. To use it, prepare its [dependencies](#requirements) and then visit its [tutorial page](tutorial_graphical.md#bamboodl-graphical-version).
 
+##Warning for Fedora users
+
+The PyQT5 package in the repos is [only built](http://robertbasic.com/blog/install-pyqt5-in-python-3-virtual-environment) against Python 2, and not Python3. Fedora 22 will include Python 3 as the default, so this only affects Fedora 21 and earlier releases. This may be an issue for other distributions as well, so be warned, you may have a few extra steps in your setup. Most distributions are in the process of switching to Python 3 as the default Python, so investigate your distro to see what the case is for you.
 
 #Bamboodl - The Culture Archiver
 
