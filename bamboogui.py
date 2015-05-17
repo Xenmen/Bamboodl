@@ -70,7 +70,7 @@ from xenutils import *
 #
 
 from bambootil import subscribe,  Downloader
-from bambootil import load_user_settings, load_subscribe_object, save_subscribe_object, load_newsubs, add_json_to_subscribe, reprocess_the_dead
+from bambootil import load_user_settings, load_subscribe_object, save_subscribe_object, load_newsubs, add_json_to_subscribe, watch_subscription_or_dont, reprocess_the_dead
 from bambootil import check_everything, spawn_downloaders, join_downloaders
 
 #
@@ -162,7 +162,6 @@ class Dialog(QDialog):
 				except Exception as e:
 					debug("\nInvalid URL:" + line.replace('\n',''), critical=True)
 					#raise e
-					new_newfile = new_newfile + line
 					#print("WHOOPS there was an error!")
 					return
 				temp_string = add_json_to_subscribe(json_test)
