@@ -1,11 +1,7 @@
 
 #Graphical Version Released
 
-<<<<<<< HEAD
 Bamboodl now has a basic GUI using PyQT5. To use it, prepare its [dependencies](#requirements) and then visit its [tutorial page](tutorial_graphical.md#bamboodl-graphical-version).
-=======
-Bamboodl now has a basic GUI using PyQT5. To use it, prepare its [dependencies](#requirements) and then visit its [tutorial page](blob/master/tutorial_graphical.md#bamboodl-graphical-version).
->>>>>>> origin/master
 
 
 #Bamboodl - The Culture Archiver
@@ -14,49 +10,29 @@ This is Bamboodl, aka *Bamboo Downloader*, a lightweight tool for archiving 8cha
 
 Bamboodl will eventually be compatible with Tumblr, Newgrounds, Deviantart, PHPBB threads, and many more sites, and have many more features, as I have time to implement them. Some sites (like Newgrounds) already work in my internal build, but the code is lousy, and needs cleanup before public release.
 
-<<<<<<< HEAD
 If you have questions about Bamboodl that aren't answered on this page, check [this faq](faq_general.md#faq) for more information.
 
 If you have questions about the future of Bamboodl, please read the [roadmap](faq_roadmap.md#roadmap) page.
-=======
-If you have questions about Bamboodl that aren't answered on this page, check [this faq](blob/master/faq_general.md#faq) for more information.
-
-If you have questions about the future of Bamboodl, please read the [roadmap](blob/master/faq_roadmap.md#roadmap) page.
->>>>>>> origin/master
 
 Alternatively, if you would like an archiver for 4chan with more features than Bamboodl has presently, [bibanon's](https://github.com/bibanon/BA-4chan-thread-archiver) is the best I know of. It's capable of polling a thread continuously (one at a time per-instance) until it 404's, and downloading only thumbnails. Bamboodl cannot yet do this, but it's under consideration.
 
 #Requirements
 
-<<<<<<< HEAD
 [Bamboodl in the console](tutorial_console.md#requirements) requires:
-=======
-[Bamboodl in the console](blob/master/tutorial_console.md#requirements) requires:
->>>>>>> origin/master
 
 - [Python 3.4+](https://www.python.org/downloads/)
 
 - [Beautiful Soup 4](http://www.crummy.com/software/BeautifulSoup/)
 
-<<<<<<< HEAD
 [The graphical version of Bamboodl](tutorial_graphical.md#requirements) additionally requires:
-=======
-[The graphical version of Bamboodl](blob/master/tutorial_graphical.md#requirements) additionally requires:
->>>>>>> origin/master
 
 - [PyQT5](http://www.riverbankcomputing.com/software/pyqt/download5)
 
 #Running
 
-<<<<<<< HEAD
 - `python3 bamboodl.py` for the [console version](tutorial_console.md)
 
 - `python3 bamboogui.py` for the [graphical version](tutorial_graphical.md)
-=======
-- `python3 bamboodl.py` for the [console version](blob/master/tutorial_console.md)
-
-- `python3 bamboogui.py` for the [graphical version](blob/master/tutorial_graphical.md)
->>>>>>> origin/master
 
 #The Basics
 
@@ -82,12 +58,6 @@ Bamboodl has a function called `reprocess_the_dead()`. If your Internet connecti
 
 #Confused?
 
-<<<<<<< HEAD
 If there's anything on this page you don't understand, visit [this faq page](faq_neophytes.md#help) for some clarification.
 
 If you have more technical questions about Bamboodl, check [this faq](faq_general.md#faq) instead.
-=======
-If there's anything on this page you don't understand, visit [this faq page](blob/master/faq_neophytes.md#help) for some clarification.
-
-If you have more technical questions about Bamboodl, check [this faq](blob/master/faq_general.md#faq) instead.
->>>>>>> origin/master

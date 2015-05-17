@@ -1,11 +1,7 @@
 
 #Bamboodl Console Version
 
-<<<<<<< HEAD
 This version of Bamboodl is run in the commandline/terminal. It is bundled with the [graphical version](tutorial_graphical.md#bamboodl-graphical-version).
-=======
-This version of Bamboodl is run in the commandline/terminal. It is bundled with the [graphical version](blob/master/tutorial_graphical.md#bamboodl-graphical-version).
->>>>>>> origin/master
 
 ##Requirements
 
@@ -28,11 +24,7 @@ Note: On some platforms, Python 3 will install with `pip` instead of `pip3`. If 
 
 **Remember how to open the command console window!** You will need that to run Bamboodl, unless you use the graphical version.
 
-<<<<<<< HEAD
 To use the console version of Bamboodl, please visit its [dedicated tutorial page](tutorial_graphical.md).
-=======
-To use the console version of Bamboodl, please visit its [dedicated tutorial page](blob/master/tutorial_graphical.md).
->>>>>>> origin/master
 
 ##Adding Threads to Download
 
@@ -60,11 +52,7 @@ If a URL is not recognized, or is formatted incorrectly, the link will be left i
 
 Execute `bamboodl.py` with Python 3, and if it's the first time you've run it, it'll create its configuration files.
 
-<<<<<<< HEAD
 In your terminal, in the directory where you've saved Bamboodl, run `python3 bamboodl.py`. Alternatively, right-click `bamboodl.py`, select 'Open With', and select Python 3. (If that doesn't work, try just `python bamboodl.py`. Make sure you've followed the steps outlined above in [requirements](#requirements), and checked the [Python help page](faq_python.md#python) for more information.)
-=======
-In your terminal, in the directory where you've saved Bamboodl, run `python3 bamboodl.py`. Alternatively, right-click `bamboodl.py`, select 'Open With', and select Python 3. (If that doesn't work, try just `python bamboodl.py`. Make sure you've followed the steps outlined above in [requirements](#requirements), and checked the [Python help page](blob/master/faq_python.md#python) for more information.)
->>>>>>> origin/master
 
 Then, it'll load `new.txt` looking for new URLs to process. Lines with valid URLs will be removed and stored in `subscribed.json`.
 
