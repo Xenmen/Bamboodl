@@ -11,6 +11,8 @@ The graphical version requires all the same setup as the console version, so be 
 
 The graphical version will process `new.txt` just like the console version, but you can also enter URLs directly in the GUI. Start up Bamboodl graphical version as explained below, enter yoru thread's URL in the text field, and press 'Register'. That's it! When you run the downloader it will be downloaded, and when you exit Bamboodl you will see the URL added to `subscribed.json`. If the URL you enter isn't valid, it will not be processed, and you will see a debug message below the text field.
 
+Also, instead of pressing the 'Register' button, pressing your 'Enter' key after copying the URL into the text field will also make Bamboodl process the URL.
+
 ##Running
 
 Running the graphical version is very similar to running the [console version](tutorial_console.md#requirements). Make sure you understand how to run *that*, and then just substitute `bamboodl.py` in the commands with `bamboogui.py`. That's it!
