@@ -7,7 +7,11 @@ Python is an [interpreted programming language](https://en.wikipedia.org/wiki/In
 
 What that means, is you have 'python code' in a text file, and a 'python application' that reads the code like a movie script and does what the script says. The script, or code, is in plain English, so you can easily read the code too.
 
+<<<<<<< HEAD
 Understanding programming, and Python, is beyond the scope of this tutorial, but to just get Python setup and running, visit the [python tutorial page](faq_python.md).
+=======
+Understanding programming, and Python, is beyond the scope of this tutorial, but to just get Python setup and running, visit the [python tutorial page](blob/master/faq_python.md).
+>>>>>>> origin/master
 
 ##I'm confused about ~ and directories
 

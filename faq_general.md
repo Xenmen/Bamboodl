@@ -1,7 +1,11 @@
 
 #FAQ
 
+<<<<<<< HEAD
 If anything on this page is too technical, try reading the [newbie page](faq_neophytes.md#help) first. If you have questions about Python, check the [Python](faq_python.md#python) page. If you have questions about future features, check the [roadmap](faq_roadmap.md#roadmap) page.
+=======
+If anything on this page is too technical, try reading the [newbie page](blob/master/faq_neophytes.md#help) first. If you have questions about Python, check the [Python](blob/master/faq_python.md#python) page. If you have questions about future features, check the [roadmap](blob/master/faq_roadmap.md#roadmap) page.
+>>>>>>> origin/master
 
 ##How EXACTLY does Bamboodl work
 
@@ -15,6 +19,12 @@ There is some additional information, and pictures, on my [personal website](htt
 
 ##Additional Help
 
+<<<<<<< HEAD
 [If you have multiple versions of python installed](faq_python.md#running-bamboodl-with-multiple-versions-of-python-installed)
 
 [If you have multiple versions of python installed](faq_python.md#running-bamboodl-with-multiple-versions-of-python-installed)
+=======
+[If you have multiple versions of python installed](blob/master/faq_python.md#running-bamboodl-with-multiple-versions-of-python-installed)
+
+[If you have multiple versions of python installed](blob/master/faq_python.md#running-bamboodl-with-multiple-versions-of-python-installed)
+>>>>>>> origin/master
