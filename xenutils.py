@@ -11,6 +11,7 @@
 ##
 import json
 import os
+import re
 import time
 import datetime
 import logging
@@ -21,6 +22,17 @@ from pathlib import Path
 from urllib import request
 from urllib.error import URLError, HTTPError
 from urllib.parse import urlparse
+
+##
+#pip3 install
+##
+from bs4 import BeautifulSoup
+
+##
+#
+##
+
+from AsciiDammit import asciiDammit
 
 ##
 #VARIABLES
@@ -110,6 +122,21 @@ def sleep_for(wait_time):
 	time.sleep(wait_time)
 
 ##
+#UNICODE HANDLING
+##
+
+unicode_stripper = re.compile(r"\&\#(?:[0-9]+);")
+
+def strip_unicode_east_asia(string_old):
+	global unicode_stripper
+	
+	return unicode_stripper.sub('EAST_ASIA_CHAR', string_old)
+
+def strip_unicode(string_old):
+
+	return asciiDammit(string_old)
+
+##
 #URL HANDLING
 ##
 
@@ -183,10 +210,18 @@ def download_raw(url):
 
 def download_soup(url):
 
-	text=download_text(url)
-	if text == None:
-		return BeautifulSoup(text)
+	parsed_text=download_text(url)
+	
+	if parsed_text != None:
+		return BeautifulSoup(strip_unicode_east_asia(parsed_text))
 	else:
 		return None
 
+##
+#BEAUTIFUL SOUP HANDLING
+##
 
+def extract_article(page_soup, target_tag, targed_id):
+	for node in page_soup.findChildren(name=target_tag, attrs={'id':targed_id}):
+		return node
+	return None
