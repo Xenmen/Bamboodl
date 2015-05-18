@@ -19,6 +19,16 @@ from threading import BoundedSemaphore
 #VARIABLES
 ##
 
+config={}
+subscribe={}
+
+total_json = []
+skipped = []
+
+new_watch = []
+new_dead = []
+threads = []
+
 #PATHS
 
 dir_settings=Path(path.expanduser("~/_python/bamboodl/"))
@@ -179,22 +189,22 @@ key_reg_replace={
 
 
 
-#SUBSCRIPTIONS
+##
+#DEFAULT SUBSCRIPTIONS
+##
 
-subscribe = {}
+#'dead' is a temporary holding pen for 404'd threads.
+#URLs marked as dead are stored here temporarily until they can be confirmed 404'd.
+#This is a temporary measure until I implement better code for detecting Internect connectivity issues.
 subscribe_default = {
 	'dead':[]
 }
 
+#Now we add a placeholder record for all accepted domains.
 for domain in domains:
 	subscribe_default[domain]={}
 
-total_json = []
-new_watch = []
-new_dead = []
-threads = []
-skipped = []
-
+#These are multithreading related variables; multithreading in Bamboodl will be heavily refactored later, so ignore these unless you're intent on doing that yourself. It'll be boring I asure you.
 subscribe_threadlock = Lock()
 checked_threads_threadlock = Lock()
 maxconnections = 3
