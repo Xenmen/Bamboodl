@@ -23,6 +23,9 @@ from threading import BoundedSemaphore
 
 dir_settings=Path(path.expanduser("~/_python/bamboodl/"))
 dir_downloads=Path(path.expanduser("~/bamboodl/"))
+dir_downloads_wip=dir_downloads/"active"
+dir_downloads_done=dir_downloads/"complete"
+
 paths = {
 	'dir_settings':dir_settings,
 	'path_conf':dir_settings / "bamboodl.json",
@@ -61,18 +64,23 @@ dom_inkbunny="inkbunny.net"
 dom_mangafox="mangafox.me"
 dom_pixiv="pixiv.net"
 
+#These domains are imageboards that have a JSON API.
 domains_imageboards_json_capable=[
 	dom_4chan,
 	dom_8chan,
 	dom_wizchan
 ]
 
+#These domains are imageboards that don't have a JSON API, so their thread's HTML must be scraped manually.
 domains_imageboards_html_scrape=[
-	dom_shanachan
+	dom_shanachan,
+	dom_krautchan
 ]
 
+#This is a collection of all accepted imageboard domains.
 domains_imageboards=domains_imageboards_json_capable + domains_imageboards_html_scrape
 
+#This is a collection of all accepted domains, including some that aren't actually handled yet.
 domains=domains_imageboards + [
 	dom_tumblr,
 	dom_newgrounds,
@@ -84,62 +92,51 @@ domains=domains_imageboards + [
 ]
 
 ##
-#ACCEPTED DIRECTORY NAMES
+#DEFAULT USER CONFIG
 ##
 
-dir_4chan="4chan"
-dir_8chan="8chan"
-dir_wizchan="wizchan"
-dir_tumblr="tumblr"
-dir_newgrounds="newgrounds"
-dir_deviantart="deviantart"
-dir_furaffinity="furaffinity"
-dir_inkbunny="inkbunny"
-dir_mangafox="mangafox"
-dir_pixiv="pixiv"
-
-directories={
-	dom_4chan:"4chan",
-	dom_8chan:"8chan",
-	dom_wizchan:"wizchan",
-	dom_tumblr:"tumblr",
-	dom_newgrounds:"newgrounds",
-	dom_deviantart:"deviantart",
-	dom_furaffinity:"furaffinity",
-	dom_inkbunny:"inkbunny",
-	dom_mangafox:"mangafox",
-	dom_pixiv:"pixiv"
+#These are the minimum and maximum wait times for each domain, dictating how quickly Bamboodl should recheck URLs on those domains.
+wait_times_default={
+	dom_4chan:[300,604800],					#5 minutes		- weekly
+	dom_8chan:[600,1209600],				#10 minutes		- bimonthly
+	dom_wizchan:[600,1209600],				#10 minutes		- bimonthly
+	dom_tumblr:[86400,2419200],				#daily			- monthly
+	dom_newgrounds:[604800,2419200],		#weekly			- monthly
+	dom_deviantart:[604800,2419200],		#weekly			- monthly
+	dom_furaffinity:[604800,2419200],		#weekly			- monthly
+	dom_inkbunny:[604800,2419200],			#weekly			- monthly
+	dom_mangafox:[2419200,14515200],		#monthly		- bi-yearly
+	dom_pixiv:[2419200,2419200]				#monthly		- monthly
 }
 
-##
-#WAIT TIMES
-##
-
-min_wait={
-	dom_4chan:300,			#5 minutes
-	dom_8chan:600,			#10 minutes
-	dom_wizchan:600,		#10 minutes
-	dom_tumblr:86400,		#daily
-	dom_newgrounds:604800,	#weekly
-	dom_deviantart:604800,	#weekly
-	dom_furaffinity:604800,	#weekly
-	dom_inkbunny:604800,	#weekly
-	dom_mangafox:2419200,	#monthly
-	dom_pixiv:2419200		#monthly
+#This is the barebones config file, but it doesn't have any domain-specific information.
+config_default = {
+	"bamboodl":{
+		"conf_version_timestamp":"1431950400",
+		"download_dir":str(dir_downloads_wip),
+		"complete_dir":str(dir_downloads_done)
+	},
+	"domains":{
+	}
 }
 
-max_wait={
-	dom_4chan:604800,			#weekly
-	dom_8chan:1209600,			#bimonthly
-	dom_wizchan:1209600,		#bimonthly
-	dom_tumblr:2419200,			#monthly
-	dom_newgrounds:2419200,		#monthly
-	dom_deviantart:2419200,		#monthly
-	dom_furaffinity:2419200,	#monthly
-	dom_inkbunny:2419200,		#monthly
-	dom_mangafox:14515200,		#bi-yearly
-	dom_pixiv:2419200			#monthly
-}
+#Here we run through all the domains and give them their own download directories and min/max wait times.
+#Additional data will be added in future versions.
+for domain in domains:
+
+	#We'll use the root domain name, minus the TLD (.com, .net, etc), as the name of the directory to store downloads from that domain.
+	#In general, websites probably won't change their root domains.
+	#8chan.co -> 8ch.net was a rare exception, but it jarred me enough to design this code in such a way that it shouldn't be a serious problem in the future.
+	dom_dir=domain.split('.')[0]
+
+	#Here we add domain-specific config data.
+	config_default['domains'][domain] = {
+		'default':{
+			'wait_time':wait_times_default[domain],
+			'download_wip':str(dir_downloads_wip/dom_dir),
+			'download_done':str(dir_downloads_done/dom_dir)
+		}
+	}
 
 ##
 #REGEX MATCH
@@ -180,16 +177,7 @@ key_reg_replace={
 	dom_pixiv:rep_start + r'"pixiv.net",\n\t"account":"\g<1>",\n\t"url":"\g<0>",\n\t"wait_time":' + str(min_wait[dom_pixiv]) + rep_stop
 }
 
-#USER SETTINGS
 
-config = {}
-config_default = {
-	"bamboodl":{
-		"database_version_date":"2015.4.1",
-		"download_dir":str(dir_downloads/"active"),
-		"complete_dir":str(dir_downloads/"complete")
-	}
-}
 
 #SUBSCRIPTIONS
 
