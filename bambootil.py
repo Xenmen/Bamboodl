@@ -369,7 +369,8 @@ class Downloader(threading.Thread):
 						temp = int(self.subscription['wait_time'] * 1.5)
 
 						#and assign.
-						if temp > max_wait[domain]:
+						#TODO: Prepare for allowing board-specific wait times.
+						if temp > config['domains'][domain]['default']['wait_time'][1]:
 							self.subscription['wait_time'] = config['domains'][domain]['default']['wait_time'][1]
 						else:
 							self.subscription['wait_time'] = temp

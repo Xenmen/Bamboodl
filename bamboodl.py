@@ -22,7 +22,7 @@ from xenutils import *
 
 #
 
-from bambootil import subscribe,  Downloader
+from bambootil import subscribe
 from bambootil import load_subscribe_object, save_subscribe_object, load_newsubs, reprocess_the_dead
 from bambootil import check_everything, spawn_downloaders, join_downloaders
 

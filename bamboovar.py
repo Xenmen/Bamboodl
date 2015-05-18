@@ -207,7 +207,7 @@ def load_user_settings():
 
 		#But if it's outdated,
 		#TODO: Move all this 'config' loading/saving stuff into bamboovar, same with handling old versions of the config standard.
-		if config["bamboodl"]["database_version_date"] == "2015.4.1":
+		if "database_version_date" in config["bamboodl"]:
 
 			#Upgrade the user's config file,
 			print("Config file out of date, updating...")
