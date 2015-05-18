@@ -46,51 +46,6 @@ from bamboovar import subscribe_threadlock, downoader_semaphore, checked_threads
 #	#	#
 
 ##
-#USER SETTINGS
-##
-
-def init_user_settings():
-	global paths, config, config_default
-
-	debug("This is the first time you're running bamboodl, or your bamboodl settings have been deleted.", critical=True)
-	debug("bamboodl is creating your settings for you, you can find them in: <user_dir>/.python/bamboodl", critical=True)
-
-	confirm_path(paths['dir_settings'])
-
-	config = config_default
-
-	j_save(paths['path_conf'], config)
-
-def load_user_settings():
-	global paths, config, subscribe
-
-	#If the user has a configuration file,
-	if paths['path_conf'].exists():
-
-		#Load it,
-		config = j_load(paths['path_conf'])
-
-		#But if it's outdated,
-		#TODO: Move all this 'config' loading/saving stuff into bamboovar, same with handling old versions of the config standard.
-		if config["bamboodl"]["database_version_date"] == "2015.4.1":
-
-			#Upgrade the user's config file,
-			upgrade_config( config["bamboodl"]["download_dir"], config["bamboodl"]["complete_dir"] )
-
-			#And save the new config!
-			j_save(paths['path_conf'], config)
-
-	#If there is no config file,
-	else:
-		#Initialize it.
-		init_user_settings()
-
-	#Fix the missing 'dead' record that early users of Bamboodl suffered.
-	#TODO: Remove this in a month or two when everybody's upgraded.
-	if 'dead' not in subscribe:
-		subscribe['dead'] = []
-
-##
 #SUBSCRIPTIONS
 ##
 
@@ -109,6 +64,11 @@ def load_subscribe_object():
 		subscribe = j_load(paths['path_subscribe'])
 	else:
 		init_user_subscribe_list()
+
+	#Fix the missing 'dead' record that early users of Bamboodl suffered.
+	#TODO: Remove this in a month or two when everybody's upgraded.
+	if 'dead' not in subscribe:
+		subscribe['dead'] = []
 
 def save_subscribe_object():
 	global paths, subscribe
@@ -221,8 +181,8 @@ class Post(object):
 
 			multifile='extra_files',
 
-			thumb_path='https://media.8ch.net/<board>/thumb/<filename>.jpg',
-			media_path='https://media.8ch.net/<board>/src/<filename><ext>'
+			thumb_path='https://<domain>/<board>/thumb/<filename>.jpg',
+			media_path='https://<domain>/<board>/src/<filename><ext>'
 		):
 		super(Post, self).__init__()
 		self.post_no = post_no
@@ -242,12 +202,13 @@ class Post(object):
 
 post_styles = {
 	dom_4chan:Post(
-		thumb_path="http://i.4cdn.org/<board>/<filename>s.jpg",
-		media_path="http://i.4cdn.org/<board>/<filename><ext>"),
-	dom_8chan:Post(),
+		thumb_path="https://i.4cdn.org/<board>/<filename>s.jpg",
+		media_path="https://i.4cdn.org/<board>/<filename><ext>"),
+	dom_8chan:Post(
+		thumb_path='https://media.<domain>/<board>/thumb/<filename>.jpg',
+		media_path='https://media.<domain>/<board>/src/<filename><ext>'),
 	dom_wizchan:Post(
-		thumb_path="http://wizchan.org/<board>/thumb/<filename>.gif",
-		media_path="http://wizchan.org/<board>/src/<filename><ext>")
+		thumb_path="https://<domain>/<board>/thumb/<filename>.gif")
 }
 
 ##
@@ -519,8 +480,10 @@ class Downloader(threading.Thread):
 		#Prepare the template media path
 		media_temp_path = self.post_standard.media_path
 
+		domain = self.subscription['domain']
+
 		#8/b/ media links are weird, they're not on the media.8ch.net subdomain, but right on 8ch.net...
-		if self.subscription['domain'] == dom_8chan and self.subscription['board'] in ['b', 'sp', 'v', 'pol']:
+		if domain == dom_8chan and self.subscription['board'] in ['b', 'sp', 'v', 'pol']:
 			#print("8/b/ thread detected")
 			media_temp_path = media_temp_path.replace('media.', '')
 
@@ -531,15 +494,15 @@ class Downloader(threading.Thread):
 				if post['ext'] != 'deleted':
 
 					#8chan does not create thumbs for GIF images
-					#if post['ext'] != '.gif' or self.subscription['domain'] != dom_8chan:
+					#if post['ext'] != '.gif' or domain != dom_8chan:
 					#Correction, 8ch has a strange means of generating thumbs; under some circumstances (OP only if the full image is png?) the thumb will be png, so just forget thumbs for 8ch for now.
-					if self.subscription['domain'] != dom_8chan:
+					if domain != dom_8chan:
 
 						#Parse thumb link
-						thumbs.append(self.post_standard.thumb_path.replace('<board>', self.subscription['board']).replace('<filename>', str(post[self.post_standard.filename_internal])).replace('<ext>', post['ext']))
+						thumbs.append(self.post_standard.thumb_path.replace('<domain>', domain).replace('<board>', self.subscription['board']).replace('<filename>', str(post[self.post_standard.filename_internal])).replace('<ext>', post['ext']))
 
 					#Parse media link
-					media.append(media_temp_path.replace('<board>', self.subscription['board']).replace('<filename>', str(post[self.post_standard.filename_internal])).replace('<ext>', post['ext']))
+					media.append(media_temp_path.replace('<domain>', domain).replace('<board>', self.subscription['board']).replace('<filename>', str(post[self.post_standard.filename_internal])).replace('<ext>', post['ext']))
 
 				if self.post_standard.multifile in post:
 					debug_v("There's more than one file in this post!")
@@ -549,15 +512,15 @@ class Downloader(threading.Thread):
 						if item['ext'] == 'deleted': continue
 
 						#8chan does not create thumbs for GIF images
-						#if item['ext'] != '.gif' or self.subscription['domain'] != dom_8chan:
+						#if item['ext'] != '.gif' or domain != dom_8chan:
 						#Correction, 8ch has a strange means of generating thumbs; under some circumstances (OP only if the full image is png?) the thumb will be png, so just forget thumbs for 8ch for now.
-						if self.subscription['domain'] != dom_8chan:
+						if domain != dom_8chan:
 
 							#Parse thumb link
-							thumbs.append(self.post_standard.thumb_path.replace('<board>', self.subscription['board']).replace('<filename>', str(item[self.post_standard.filename_internal])).replace('<ext>', '.jpg'))
+							thumbs.append(self.post_standard.thumb_path.replace('<domain>', domain).replace('<board>', self.subscription['board']).replace('<filename>', str(item[self.post_standard.filename_internal])).replace('<ext>', '.jpg'))
 
 						#Parse media link
-						media.append(media_temp_path.replace('<board>', self.subscription['board']).replace('<filename>', str(item[self.post_standard.filename_internal])).replace('<ext>', item['ext']))
+						media.append(media_temp_path.replace('<domain>', domain).replace('<board>', self.subscription['board']).replace('<filename>', str(item[self.post_standard.filename_internal])).replace('<ext>', item['ext']))
 			else:
 				pass
 				debug_v("\t'no files'")

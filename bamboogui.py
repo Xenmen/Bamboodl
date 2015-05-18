@@ -62,7 +62,7 @@ import re
 import threading
 
 ##
-#bamboodl
+#Bamboodl
 ##
 
 from xenutils import *

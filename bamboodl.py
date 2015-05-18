@@ -23,7 +23,7 @@ from xenutils import *
 #
 
 from bambootil import subscribe,  Downloader
-from bambootil import load_user_settings, load_subscribe_object, save_subscribe_object, load_newsubs, reprocess_the_dead
+from bambootil import load_subscribe_object, save_subscribe_object, load_newsubs, reprocess_the_dead
 from bambootil import check_everything, spawn_downloaders, join_downloaders
 
 #
@@ -58,8 +58,6 @@ def bamboodl_run():
 	debug_enable()
 
 	#1 Load new urls list, delete list, put new URLs into watched.json under 'new', save watched.json
-	load_user_settings()
-	print("Settings loaded...")
 	load_subscribe_object()
 	print("Current Subscriptions loaded...")
 	load_newsubs()

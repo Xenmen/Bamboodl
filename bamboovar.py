@@ -16,6 +16,12 @@ from urllib import request
 from threading import BoundedSemaphore
 
 ##
+#Bamboodl
+##
+
+from xenutils import confirm_path, j_save, j_load
+
+##
 #VARIABLES
 ##
 
@@ -105,20 +111,6 @@ domains=domains_imageboards + [
 #DEFAULT USER CONFIG
 ##
 
-#These are the minimum and maximum wait times for each domain, dictating how quickly Bamboodl should recheck URLs on those domains.
-wait_times_default={
-	dom_4chan:[300,604800],					#5 minutes		- weekly
-	dom_8chan:[600,1209600],				#10 minutes		- bimonthly
-	dom_wizchan:[600,1209600],				#10 minutes		- bimonthly
-	dom_tumblr:[86400,2419200],				#daily			- monthly
-	dom_newgrounds:[604800,2419200],		#weekly			- monthly
-	dom_deviantart:[604800,2419200],		#weekly			- monthly
-	dom_furaffinity:[604800,2419200],		#weekly			- monthly
-	dom_inkbunny:[604800,2419200],			#weekly			- monthly
-	dom_mangafox:[2419200,14515200],		#monthly		- bi-yearly
-	dom_pixiv:[2419200,2419200]				#monthly		- monthly
-}
-
 #This is the barebones config file, but it doesn't have any domain-specific information.
 config_default = {
 	"bamboodl":{
@@ -128,6 +120,22 @@ config_default = {
 	},
 	"domains":{
 	}
+}
+
+#These are the minimum and maximum wait times for each domain, dictating how quickly Bamboodl should recheck URLs on those domains.
+wait_times_default={
+	dom_4chan:[300,604800],					#5 minutes		- weekly
+	dom_8chan:[600,1209600],				#10 minutes		- bimonthly
+	dom_wizchan:[600,1209600],				#10 minutes		- bimonthly
+	dom_shanachan:[600,1209600],			#10 minutes		- bimonthly
+	dom_krautchan:[600,1209600],			#10 minutes		- bimonthly
+	dom_tumblr:[86400,2419200],				#daily			- monthly
+	dom_newgrounds:[604800,2419200],		#weekly			- monthly
+	dom_deviantart:[604800,2419200],		#weekly			- monthly
+	dom_furaffinity:[604800,2419200],		#weekly			- monthly
+	dom_inkbunny:[604800,2419200],			#weekly			- monthly
+	dom_mangafox:[2419200,14515200],		#monthly		- bi-yearly
+	dom_pixiv:[2419200,2419200]				#monthly		- monthly
 }
 
 #Here we run through all the domains and give them their own download directories and min/max wait times.
@@ -150,22 +158,72 @@ for domain in domains:
 
 #Upgrader from the first public release config file to the 2015-05-18 one.
 def upgrade_config(dir_old_wip, dir_old_done):
-	global config, config_default
+	global config
 
 	dir_wip = Path(dir_old_wip)
 	dir_done = Path(dir_old_done)
+
+	config['domains'] = {}
+
+	del config['bamboodl']["database_version_date"]
+	config['bamboodl']["conf_version_timestamp"]="1431950400"
 
 	for domain in domains:
 
 		dom_dir=domain.split('.')[0]
 
-		config_default['domains'][domain] = {
+		config['domains'][domain] = {
 			'default':{
 				'wait_time':wait_times_default[domain],
 				'download_wip':str(dir_wip/dom_dir),
 				'download_done':str(dir_done/dom_dir)
 			}
 		}
+
+##
+#CONFIG ACCESS FUNCTIONS
+##
+
+def init_user_settings():
+	global paths, config, config_default
+
+	print("This is the first time you're running bamboodl, or your bamboodl settings have been deleted.", critical=True)
+	print("bamboodl is creating your settings for you, you can find them in: <user_dir>/.python/bamboodl", critical=True)
+
+	confirm_path(paths['dir_settings'])
+
+	config = config_default
+
+	j_save(paths['path_conf'], config)
+
+def load_user_settings():
+	global paths, config
+
+	#If the user has a configuration file,
+	if paths['path_conf'].exists():
+
+		#Load it,
+		config = j_load(paths['path_conf'])
+
+		#But if it's outdated,
+		#TODO: Move all this 'config' loading/saving stuff into bamboovar, same with handling old versions of the config standard.
+		if config["bamboodl"]["database_version_date"] == "2015.4.1":
+
+			#Upgrade the user's config file,
+			print("Config file out of date, updating...")
+			upgrade_config( config["bamboodl"]["download_dir"], config["bamboodl"]["complete_dir"] )
+
+			#And save the new config!
+			j_save(paths['path_conf'], config)
+
+	#If there is no config file,
+	else:
+		#Initialize it.
+		init_user_settings()
+
+	print("Settings loaded...")
+
+load_user_settings()
 
 ##
 #REGEX MATCH
@@ -194,16 +252,16 @@ rep_start=r'{\n\t"last_updated":0,\n\t"last_checked":0,\n\t"domain":'
 rep_stop=r'\n}'
 
 key_reg_replace={
-	dom_4chan:rep_start + r'"4chan.org",\n\t"board":"\g<1>",\n\t"thread":"\g<2>",\n\t"url":"https://boards.4chan.org/\g<1>/thread/\g<2>.json",\n\t"wait_time":' + str(min_wait[dom_4chan]) + rep_stop,
-	dom_8chan:rep_start + r'"8ch.net",\n\t"board":"\g<1>",\n\t"thread":"\g<2>",\n\t"url":"https://8ch.net/\g<1>/res/\g<2>.json",\n\t"wait_time":' + str(min_wait[dom_8chan]) + rep_stop,
-	dom_wizchan:rep_start + r'"wizchan.org",\n\t"board":"\g<1>",\n\t"thread":"\g<2>",\n\t"url":"https://wizchan.org/\g<1>/res/\g<2>.json",\n\t"wait_time":' + str(min_wait[dom_wizchan]) + rep_stop,
-	dom_tumblr:rep_start + r'"tumblr.com",\n\t"account":"\g<1>",\n\t"url":"http://\g<1>.tumblr.com/",\n\t"tags":["\g<2>"],\n\t"wait_time":' + str(min_wait[dom_tumblr]) + rep_stop,
-	dom_newgrounds:rep_start + r'"newgrounds.com",\n\t"account":"\g<1>",\n\t"url":"\g<0>",\n\t"wait_time":' + str(min_wait[dom_newgrounds]) + rep_stop,
-	dom_deviantart:rep_start + r'"deviantart.com",\n\t"account":"\g<1>",\n\t"url":"\g<0>",\n\t"wait_time":' + str(min_wait[dom_deviantart]) + rep_stop,
-	dom_furaffinity:rep_start + r'"furaffinity.com",\n\t"account":"\g<1>",\n\t"url":"\g<0>",\n\t"wait_time":' + str(min_wait[dom_furaffinity]) + rep_stop,
-	dom_inkbunny:rep_start + r'"inkbunny.net",\n\t"account":"\g<1>",\n\t"url":"\g<0>",\n\t"wait_time":' + str(min_wait[dom_inkbunny]) + rep_stop,
-	dom_mangafox:rep_start + r'"mangafox.me",\n\t"account":"\g<1>",\n\t"url":"\g<0>",\n\t"wait_time":' + str(min_wait[dom_pixiv]) + rep_stop,
-	dom_pixiv:rep_start + r'"pixiv.net",\n\t"account":"\g<1>",\n\t"url":"\g<0>",\n\t"wait_time":' + str(min_wait[dom_pixiv]) + rep_stop
+	dom_4chan:rep_start + r'"4chan.org",\n\t"board":"\g<1>",\n\t"thread":"\g<2>",\n\t"url":"https://boards.4chan.org/\g<1>/thread/\g<2>.json",\n\t"wait_time":' + str(config['domains'][dom_4chan]['default']['wait_time'][0]) + rep_stop,
+	dom_8chan:rep_start + r'"8ch.net",\n\t"board":"\g<1>",\n\t"thread":"\g<2>",\n\t"url":"https://8ch.net/\g<1>/res/\g<2>.json",\n\t"wait_time":' + str(config['domains'][dom_8chan]['default']['wait_time'][0]) + rep_stop,
+	dom_wizchan:rep_start + r'"wizchan.org",\n\t"board":"\g<1>",\n\t"thread":"\g<2>",\n\t"url":"https://wizchan.org/\g<1>/res/\g<2>.json",\n\t"wait_time":' + str(config['domains'][dom_wizchan]['default']['wait_time'][0]) + rep_stop,
+	dom_tumblr:rep_start + r'"tumblr.com",\n\t"account":"\g<1>",\n\t"url":"http://\g<1>.tumblr.com/",\n\t"tags":["\g<2>"],\n\t"wait_time":' + str(config['domains'][dom_tumblr]['default']['wait_time'][0]) + rep_stop,
+	dom_newgrounds:rep_start + r'"newgrounds.com",\n\t"account":"\g<1>",\n\t"url":"\g<0>",\n\t"wait_time":' + str(config['domains'][dom_newgrounds]['default']['wait_time'][0]) + rep_stop,
+	dom_deviantart:rep_start + r'"deviantart.com",\n\t"account":"\g<1>",\n\t"url":"\g<0>",\n\t"wait_time":' + str(config['domains'][dom_deviantart]['default']['wait_time'][0]) + rep_stop,
+	dom_furaffinity:rep_start + r'"furaffinity.com",\n\t"account":"\g<1>",\n\t"url":"\g<0>",\n\t"wait_time":' + str(config['domains'][dom_furaffinity]['default']['wait_time'][0]) + rep_stop,
+	dom_inkbunny:rep_start + r'"inkbunny.net",\n\t"account":"\g<1>",\n\t"url":"\g<0>",\n\t"wait_time":' + str(config['domains'][dom_inkbunny]['default']['wait_time'][0]) + rep_stop,
+	dom_mangafox:rep_start + r'"mangafox.me",\n\t"account":"\g<1>",\n\t"url":"\g<0>",\n\t"wait_time":' + str(config['domains'][dom_pixiv]['default']['wait_time'][0]) + rep_stop,
+	dom_pixiv:rep_start + r'"pixiv.net",\n\t"account":"\g<1>",\n\t"url":"\g<0>",\n\t"wait_time":' + str(config['domains'][dom_pixiv]['default']['wait_time'][0]) + rep_stop
 }
 
 
