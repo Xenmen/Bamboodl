@@ -25,7 +25,7 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
 ##
-#bamboodl
+#Bamboodl
 ##
 
 from xenutils import *
@@ -33,12 +33,12 @@ from xenutils import *
 #
 
 #from bamboovar import debug_log, debug_print, debug_verbose
-from bamboovar import paths, directories, min_wait, max_wait
-from bamboovar import opener
+from bamboovar import paths, opener
+from bamboovar import config, subscribe
 from bamboovar import dom_4chan, dom_8chan, dom_wizchan, dom_tumblr, dom_newgrounds, dom_deviantart, dom_furaffinity, dom_inkbunny
 from bamboovar import domains_imageboards
 from bamboovar import key_regex, key_reg_replace
-from bamboovar import config, config_default, subscribe, subscribe_default, threads
+from bamboovar import config_default, subscribe_default, threads
 from bamboovar import total_json, skipped, new_watch, new_dead
 from bamboovar import subscribe_threadlock, downoader_semaphore, checked_threads_threadlock
 
@@ -317,7 +317,7 @@ class Downloader(threading.Thread):
 					done = True
 
 	def dl_imageboard(self):
-		global downoader_semaphore, directories, min_wait, max_wait
+		global downoader_semaphore, config
 
 		url = self.subscription['url']
 
@@ -326,7 +326,7 @@ class Downloader(threading.Thread):
 		thread_data = {}
 
 		#And change the path so that all data for this thread will be saved in a subdirectory matching the board and thread id
-		self.path = Path(config['bamboodl']['download_dir']) / directories[domain] / self.subscription['board'] / str(self.subscription['thread'])
+		self.path = Path(config['domains'][domain]['default']['download_wip']) / self.subscription['board'] / str(self.subscription['thread'])
 		confirm_path(self.path)
 
 		#Record current time
@@ -384,14 +384,14 @@ class Downloader(threading.Thread):
 				if new_update_time == self.subscription['last_updated']:
 
 					#And we aren't already over the max wait time for that domain...
-					if self.subscription['wait_time'] <= max_wait[domain]:
+					if self.subscription['wait_time'] <= config['domains'][domain]['default']['wait_time'][1]:
 
 						#Increase the wait time until checking again...
 						temp = int(self.subscription['wait_time'] * 1.5)
 
 						#and assign.
 						if temp > max_wait[domain]:
-							self.subscription['wait_time'] = max_wait[domain]
+							self.subscription['wait_time'] = config['domains'][domain]['default']['wait_time'][1]
 						else:
 							self.subscription['wait_time'] = temp
 
@@ -403,7 +403,8 @@ class Downloader(threading.Thread):
 
 					#Reset wait_time to the minimum value...
 					#TODO: Check the timestamps of other posts in the thread, get the average time between them, use that to generate a more accurate wait_time
-					self.subscription['wait_time'] = min_wait[self.subscription['domain']]
+					#TODO: Implement board-specific wait times, and only fall back to the domain default if there's no board specific time on record.
+					self.subscription['wait_time'] = config['domains'][self.subscription['domain']]['default']['wait_time'][0]
 
 				#Finally, update last_updated to reflect the latest post's timestamp.
 				self.subscription['last_updated'] = new_update_time
