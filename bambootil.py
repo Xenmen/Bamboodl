@@ -35,7 +35,8 @@ from xenutils import *
 #from bamboovar import debug_log, debug_print, debug_verbose
 from bamboovar import paths, directories, min_wait, max_wait
 from bamboovar import opener
-from bamboovar import dom_4chan, dom_8chan, dom_tumblr, dom_newgrounds, dom_deviantart, dom_furaffinity, dom_inkbunny
+from bamboovar import dom_4chan, dom_8chan, dom_wizchan, dom_tumblr, dom_newgrounds, dom_deviantart, dom_furaffinity, dom_inkbunny
+from bamboovar import domains_imageboards
 from bamboovar import key_regex, key_reg_replace
 from bamboovar import config, config_default, subscribe, subscribe_default, threads
 from bamboovar import total_json, skipped, new_watch, new_dead
@@ -99,12 +100,12 @@ def save_subscribe_object():
 	j_save(paths['path_subscribe'], subscribe)
 
 def add_json_to_subscribe(new_json):
-	global subscribe, dom_4chan, dom_8chan
+	global subscribe, domains_imageboards
 
 	domain = new_json['domain']
 	if domain not in subscribe:
 		subscribe[domain] = {}
-	if domain == dom_4chan or domain == dom_8chan:
+	if domain in domains_imageboards:
 		board=new_json['board']
 		thread=new_json['thread']
 		if board not in subscribe[domain]:
@@ -202,7 +203,7 @@ class Post(object):
 
 			multifile='extra_files',
 
-			thumb_path='https://media.8ch.net/<board>/thumb/<filename><ext>',
+			thumb_path='https://media.8ch.net/<board>/thumb/<filename>.jpg',
 			media_path='https://media.8ch.net/<board>/src/<filename><ext>'
 		):
 		super(Post, self).__init__()
@@ -223,9 +224,12 @@ class Post(object):
 
 post_styles = {
 	dom_4chan:Post(
-		thumb_path="http://i.4cdn.org/<board>/<filename>s<ext>",
+		thumb_path="http://i.4cdn.org/<board>/<filename>s.jpg",
 		media_path="http://i.4cdn.org/<board>/<filename><ext>"),
-	dom_8chan:Post()
+	dom_8chan:Post(),
+	dom_wizchan:Post(
+		thumb_path="http://wizchan.org/<board>/thumb/<filename>.gif",
+		media_path="http://wizchan.org/<board>/src/<filename><ext>")
 }
 
 ##
@@ -248,7 +252,7 @@ class Downloader(threading.Thread):
 
 	def run(self):
 		global subscribe_threadlock, checked_threads_threadlock
-		global dom_4chan, dom_8chan, dom_tumblr, dom_newgrounds
+		global domains_imageboards, dom_tumblr, dom_newgrounds
 		global post_styles, total_json, new_watch, new_dead
 
 		self.dead = False
@@ -261,12 +265,8 @@ class Downloader(threading.Thread):
 			domain = self.subscription['domain']
 			debug_v("Now on: " + self.subscription['url'])
 
-			if domain == dom_4chan:
-				self.post_standard = post_styles[dom_4chan]
-				self.dl_imageboard()
-
-			elif domain == dom_8chan:
-				self.post_standard = post_styles[dom_8chan]
+			if domain in domains_imageboards:
+				self.post_standard = post_styles[domain]
 				self.dl_imageboard()
 
 			elif domain == dom_tumblr:
@@ -455,6 +455,10 @@ class Downloader(threading.Thread):
 			#Create a temporary version, so that when we save the file to disk we have no risk of a partially downloaded file
 			#TODO: Consider not doing this for webms, since they may be of a much larger size than images
 			temp_storage=download_raw(url)
+
+			if temp_storage == None:
+				print("File is blank/invalid.")
+				return False
 			
 			#Save the file to disk
 			with open(filepath, "wb") as local_file:
@@ -513,7 +517,7 @@ class Downloader(threading.Thread):
 					if self.subscription['domain'] != dom_8chan:
 
 						#Parse thumb link
-						thumbs.append(self.post_standard.thumb_path.replace('<board>', self.subscription['board']).replace('<filename>', str(post[self.post_standard.filename_internal])).replace('<ext>', '.jpg'))
+						thumbs.append(self.post_standard.thumb_path.replace('<board>', self.subscription['board']).replace('<filename>', str(post[self.post_standard.filename_internal])).replace('<ext>', post['ext']))
 
 					#Parse media link
 					media.append(media_temp_path.replace('<board>', self.subscription['board']).replace('<filename>', str(post[self.post_standard.filename_internal])).replace('<ext>', post['ext']))
@@ -606,12 +610,12 @@ def fetch_l2_json(domain, sublevel):
 		watch_subscription_or_dont(subscription)
 
 def check_everything():
-	global subscribe, total_json
+	global subscribe, total_json, domains_imageboards
 
 	#print("\n\n\nHEYO TIME TO WORKO")
 	
 	one_layer = ['tumblr.com', 'newgrounds.com', 'deviantart.com']
-	two_layer = ['4chan.org', '8ch.net']
+	two_layer = domains_imageboards
 
 	for key in one_layer:
 		if key in subscribe:

@@ -48,6 +48,7 @@ request.install_opener(opener)
 
 dom_4chan="4chan.org"
 dom_8chan="8ch.net"
+dom_wizchan="wizchan.org"
 dom_tumblr="tumblr.com"
 dom_newgrounds="newgrounds.com"
 dom_deviantart="deviantart.com"
@@ -59,6 +60,7 @@ dom_pixiv="pixiv.net"
 domains=[
 	dom_4chan,
 	dom_8chan,
+	dom_wizchan,
 	dom_tumblr,
 	dom_newgrounds,
 	dom_deviantart,
@@ -68,12 +70,19 @@ domains=[
 	dom_pixiv
 ]
 
+domains_imageboards=[
+	dom_4chan,
+	dom_8chan,
+	dom_wizchan
+]
+
 ##
 #ACCEPTED DIRECTORY NAMES
 ##
 
 dir_4chan="4chan"
 dir_8chan="8chan"
+dir_wizchan="wizchan"
 dir_tumblr="tumblr"
 dir_newgrounds="newgrounds"
 dir_deviantart="deviantart"
@@ -85,6 +94,7 @@ dir_pixiv="pixiv"
 directories={
 	dom_4chan:"4chan",
 	dom_8chan:"8chan",
+	dom_wizchan:"wizchan",
 	dom_tumblr:"tumblr",
 	dom_newgrounds:"newgrounds",
 	dom_deviantart:"deviantart",
@@ -101,6 +111,7 @@ directories={
 min_wait={
 	dom_4chan:300,			#5 minutes
 	dom_8chan:600,			#10 minutes
+	dom_wizchan:600,		#10 minutes
 	dom_tumblr:86400,		#daily
 	dom_newgrounds:604800,	#weekly
 	dom_deviantart:604800,	#weekly
@@ -113,6 +124,7 @@ min_wait={
 max_wait={
 	dom_4chan:604800,			#weekly
 	dom_8chan:1209600,			#bimonthly
+	dom_wizchan:1209600,		#bimonthly
 	dom_tumblr:2419200,			#monthly
 	dom_newgrounds:2419200,		#monthly
 	dom_deviantart:2419200,		#monthly
@@ -129,8 +141,9 @@ max_wait={
 reg_start=r"(?:https?:\/\/)?(?:www\.)?"
 
 key_regex = {
-	dom_4chan:reg_start+r"boards\." + dom_4chan + r"/(\w+)/thread/([0-9]+)((?:\.json)|/?(?:[a-zA-Z-]*))",
-	dom_8chan:reg_start+r"8ch.net/([a-zA-Z0-9-+]*)/res/?([0-9]+)(?:(?:.html)|(?:.json))",
+	dom_4chan:reg_start+r"boards\." + dom_4chan + r"/(\w+)/thread/([0-9]+)((?:\.json)|/?(?:[a-zA-Z-]*))(?:#q?[0-9]+)?",
+	dom_8chan:reg_start+r"8ch.net/([a-zA-Z0-9-+]*)/res/?([0-9]+)(?:(?:.html)|(?:.json))(?:#q?[0-9]+)?",
+	dom_wizchan:reg_start+r"wizchan.org/([a-zA-Z0-9-+]*)/res/?([0-9]+)(?:(?:.html)|(?:.json))(?:#q?[0-9]+)?",
 	dom_tumblr:reg_start+r"([a-zA-Z0-9-]*)\." + dom_tumblr + "\/?(?:tagged\/)?([a-zA-Z0-9-_+=#]*)",
 	dom_newgrounds:reg_start+r"([a-zA-Z0-9-]*)\." + dom_newgrounds + r"\/?",
 	dom_deviantart:reg_start+r"([a-zA-Z0-9-]*)\." + dom_deviantart + r"\/?",
@@ -150,6 +163,7 @@ rep_stop=r'\n}'
 key_reg_replace={
 	dom_4chan:rep_start + r'"4chan.org",\n\t"board":"\g<1>",\n\t"thread":"\g<2>",\n\t"url":"https://boards.4chan.org/\g<1>/thread/\g<2>.json",\n\t"wait_time":' + str(min_wait[dom_4chan]) + rep_stop,
 	dom_8chan:rep_start + r'"8ch.net",\n\t"board":"\g<1>",\n\t"thread":"\g<2>",\n\t"url":"https://8ch.net/\g<1>/res/\g<2>.json",\n\t"wait_time":' + str(min_wait[dom_8chan]) + rep_stop,
+	dom_wizchan:rep_start + r'"wizchan.org",\n\t"board":"\g<1>",\n\t"thread":"\g<2>",\n\t"url":"https://wizchan.org/\g<1>/res/\g<2>.json",\n\t"wait_time":' + str(min_wait[dom_wizchan]) + rep_stop,
 	dom_tumblr:rep_start + r'"tumblr.com",\n\t"account":"\g<1>",\n\t"url":"http://\g<1>.tumblr.com/",\n\t"tags":["\g<2>"],\n\t"wait_time":' + str(min_wait[dom_tumblr]) + rep_stop,
 	dom_newgrounds:rep_start + r'"newgrounds.com",\n\t"account":"\g<1>",\n\t"url":"\g<0>",\n\t"wait_time":' + str(min_wait[dom_newgrounds]) + rep_stop,
 	dom_deviantart:rep_start + r'"deviantart.com",\n\t"account":"\g<1>",\n\t"url":"\g<0>",\n\t"wait_time":' + str(min_wait[dom_deviantart]) + rep_stop,
