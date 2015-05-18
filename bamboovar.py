@@ -49,6 +49,10 @@ request.install_opener(opener)
 dom_4chan="4chan.org"
 dom_8chan="8ch.net"
 dom_wizchan="wizchan.org"
+
+dom_shanachan="shanachan.org"
+dom_krautchan="krautchan.net"
+
 dom_tumblr="tumblr.com"
 dom_newgrounds="newgrounds.com"
 dom_deviantart="deviantart.com"
@@ -57,10 +61,19 @@ dom_inkbunny="inkbunny.net"
 dom_mangafox="mangafox.me"
 dom_pixiv="pixiv.net"
 
-domains=[
+domains_imageboards_json_capable=[
 	dom_4chan,
 	dom_8chan,
-	dom_wizchan,
+	dom_wizchan
+]
+
+domains_imageboards_html_scrape=[
+	dom_shanachan
+]
+
+domains_imageboards=domains_imageboards_json_capable + domains_imageboards_html_scrape
+
+domains=domains_imageboards + [
 	dom_tumblr,
 	dom_newgrounds,
 	dom_deviantart,
@@ -68,12 +81,6 @@ domains=[
 	dom_inkbunny,
 	dom_mangafox,
 	dom_pixiv
-]
-
-domains_imageboards=[
-	dom_4chan,
-	dom_8chan,
-	dom_wizchan
 ]
 
 ##
