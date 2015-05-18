@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 from urllib import request
 
 ##
-#bamboodl
+#Bamboodl
 ##
 
 from xenutils import *

@@ -38,7 +38,7 @@ from bamboovar import config, subscribe
 from bamboovar import dom_4chan, dom_8chan, dom_wizchan, dom_tumblr, dom_newgrounds, dom_deviantart, dom_furaffinity, dom_inkbunny
 from bamboovar import domains_imageboards
 from bamboovar import key_regex, key_reg_replace
-from bamboovar import config_default, subscribe_default, threads
+from bamboovar import config_default, subscribe_default, upgrade_config, threads
 from bamboovar import total_json, skipped, new_watch, new_dead
 from bamboovar import subscribe_threadlock, downoader_semaphore, checked_threads_threadlock
 
@@ -64,11 +64,29 @@ def init_user_settings():
 def load_user_settings():
 	global paths, config, subscribe
 
+	#If the user has a configuration file,
 	if paths['path_conf'].exists():
+
+		#Load it,
 		config = j_load(paths['path_conf'])
+
+		#But if it's outdated,
+		#TODO: Move all this 'config' loading/saving stuff into bamboovar, same with handling old versions of the config standard.
+		if config["bamboodl"]["database_version_date"] == "2015.4.1":
+
+			#Upgrade the user's config file,
+			upgrade_config( config["bamboodl"]["download_dir"], config["bamboodl"]["complete_dir"] )
+
+			#And save the new config!
+			j_save(paths['path_conf'], config)
+
+	#If there is no config file,
 	else:
+		#Initialize it.
 		init_user_settings()
 
+	#Fix the missing 'dead' record that early users of Bamboodl suffered.
+	#TODO: Remove this in a month or two when everybody's upgraded.
 	if 'dead' not in subscribe:
 		subscribe['dead'] = []
 

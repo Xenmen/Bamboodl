@@ -148,6 +148,25 @@ for domain in domains:
 		}
 	}
 
+#Upgrader from the first public release config file to the 2015-05-18 one.
+def upgrade_config(dir_old_wip, dir_old_done):
+	global config, config_default
+
+	dir_wip = Path(dir_old_wip)
+	dir_done = Path(dir_old_done)
+
+	for domain in domains:
+
+		dom_dir=domain.split('.')[0]
+
+		config_default['domains'][domain] = {
+			'default':{
+				'wait_time':wait_times_default[domain],
+				'download_wip':str(dir_wip/dom_dir),
+				'download_done':str(dir_done/dom_dir)
+			}
+		}
+
 ##
 #REGEX MATCH
 ##
