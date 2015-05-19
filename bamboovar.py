@@ -147,6 +147,12 @@ for domain in domains:
 	#8chan.co -> 8ch.net was a rare exception, but it jarred me enough to design this code in such a way that it shouldn't be a serious problem in the future.
 	dom_dir=domain.split('.')[0]
 
+	#I'm going to assume everyone would rather have '8chan' as the download dir name than '8ch'.
+	#Either way:
+	#TODO: Add GUI functionality for changing these values.
+	if dom_dir == "8ch":
+		dom_dir = "8chan"
+
 	#Here we add domain-specific config data.
 	config_default['domains'][domain] = {
 		'default':{

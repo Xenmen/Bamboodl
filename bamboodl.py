@@ -24,7 +24,7 @@ from xenutils import *
 
 from bambootil import subscribe
 from bambootil import load_subscribe_object, save_subscribe_object, load_newsubs, reprocess_the_dead
-from bambootil import check_everything, spawn_downloaders, join_downloaders
+from bambootil import check_everything, spawn_downloaders, join_downloaders, process_updated_subscriptions
 
 #
 
@@ -79,6 +79,12 @@ def bamboodl_run():
 	join_downloaders()
 	print("Downloaders have exited...")
 
+	#4 Process the updated subscription data
+	print("Processing the updated subscriptions...")
+	process_updated_subscriptions()
+	print("Updated subscriptions processed...")
+
+	#5 Save to disk
 	print("Saving updated subscription data...")
 	save_subscribe_object()
 	print("Complete.")

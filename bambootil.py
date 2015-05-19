@@ -242,7 +242,7 @@ class Downloader(threading.Thread):
 
 		while not done:
 			domain = self.subscription['domain']
-			debug_v("Now on: " + self.subscription['url'])
+			debug("Now on: " + self.subscription['url'])
 
 			if domain in domains_imageboards:
 				self.post_standard = post_styles[domain]
@@ -565,14 +565,16 @@ def time_to_update(subscription):
 		return False
 
 def watch_subscription_or_dont(subscription):
-	global total_json, skipped
+	global total_json, skipped, subscribe_threadlock
+
+	with subscribe_threadlock:
 	
-	if time_to_update(subscription):
-		#print("Adding watched: " + subscription['url'])
-		total_json.append(subscription)
-	else:
-		#print("Skipping watched: " + subscription['url'])
-		skipped.append(subscription)
+		if time_to_update(subscription):
+			#print("Adding watched: " + subscription['url'])
+			total_json.append(subscription)
+		else:
+			#print("Skipping watched: " + subscription['url'])
+			skipped.append(subscription)
 
 def fetch_l1_json(domain):
 	global subscribe, total_json, skipped
@@ -630,16 +632,19 @@ def spawn_downloaders():
 		thread.start()
 
 def join_downloaders():
-	global subscribe, threads, skipped, new_watch, new_dead
-	
-	one_layer = ['tumblr.com', 'newgrounds.com', 'deviantart.com']
-	two_layer = ['4chan.org', '8ch.net']
+	global threads
 
 	for item in threads:
 		#print("Joining: " + item.subscription['url'])
 		item.join()
-	#new_watch.extend(skipped)
 
+def process_updated_subscriptions():
+	global subscribe, skipped, new_watch, new_dead
+	
+	one_layer = ['tumblr.com', 'newgrounds.com', 'deviantart.com']
+	two_layer = ['4chan.org', '8ch.net']
+
+	#new_watch.extend(skipped)
 	for item in new_watch:
 		domain = item['domain']
 		if domain in one_layer:

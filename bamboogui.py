@@ -70,8 +70,8 @@ from xenutils import *
 #
 
 from bambootil import subscribe,  Downloader
-from bambootil import load_user_settings, load_subscribe_object, save_subscribe_object, load_newsubs, add_json_to_subscribe, watch_subscription_or_dont, reprocess_the_dead
-from bambootil import check_everything, spawn_downloaders, join_downloaders
+from bambootil import load_subscribe_object, save_subscribe_object, load_newsubs, add_json_to_subscribe, watch_subscription_or_dont, reprocess_the_dead
+from bambootil import check_everything, spawn_downloaders, join_downloaders, process_updated_subscriptions
 
 #
 
@@ -170,7 +170,8 @@ class Dialog(QDialog):
 
 				#If the downloader is running, add the subscription just created to the list for the downloaders to grab
 				if self.running:
-					print("ADDING A THING WHILE RUNNING")
+
+					print("New URL registered while running: " + line)
 					watch_subscription_or_dont(json_test)
 
 				#Update the debug field if there's feedback,
@@ -215,6 +216,9 @@ class Dialog(QDialog):
 		self.append_label_text_download("Downloading. . .")
 		join_downloaders()
 		self.append_label_text_download("Done downloading.")
+		self.append_label_text_download("Updating subscriptions. . .")
+		process_updated_subscriptions()
+		self.append_label_text_download("Done updating.")
 
 		self.running = False
 
@@ -254,9 +258,7 @@ if __name__ == '__main__':
 
 	debug_enable()
 
-	#1 Load user settings and subscription object
-	load_user_settings()
-	print("Settings loaded...")
+	#1 Load subscription object
 	load_subscribe_object()
 	print("Current Subscriptions loaded...")
 
@@ -264,6 +266,9 @@ if __name__ == '__main__':
 	dialog = Dialog()
 
 	dialog.exec_()
+
+	print("Flushing updated subscription data...")
+	process_updated_subscriptions()
 
 	print("Saving updated subscription data...")
 	save_subscribe_object()
