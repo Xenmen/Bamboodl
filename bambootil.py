@@ -59,7 +59,6 @@ def init_user_subscribe_list():
 def load_subscribe_object():
 	global paths, subscribe
 
-	debug("\n\n\t###\t#\t#\t#\n\tLOADING SUBSCRIPTIONS OBJECT\n\t#\t#\t#\t###\n")
 	if paths['path_subscribe'].exists():
 		#print("\n\n\nLOADINGGGGG")
 		subscribe = j_load(paths['path_subscribe'])
@@ -71,10 +70,12 @@ def load_subscribe_object():
 	if 'dead' not in subscribe:
 		subscribe['dead'] = []
 
+	debug("\n\n\t###\t###\t###\t###\n\tSubscriptions Object Loaded\n\t###\t###\t###\t###\n")
+
 def save_subscribe_object():
 	global paths, subscribe
 
-	debug("\n\n\t###\t#\t#\t#\n\tSAVING SUBSCRIPTIONS OBJECT\n\t#\t#\t#\t###\n")
+	debug("\n\n\t###\t###\t###\t###\n\tSubscriptions Object Saved\n\t###\t###\t###\t###\n")
 	j_save(paths['path_subscribe'], subscribe)
 
 def add_json_to_subscribe(new_json):
@@ -253,8 +254,6 @@ class Downloader(threading.Thread):
 
 		domain = self.subscription['domain']
 
-		thread_data = {}
-
 		#And change the path so that all data for this thread will be saved in a subdirectory matching the board and thread id
 		self.path = Path(config['domains'][domain]['default']['download_wip']) / self.subscription['board'] / str(self.subscription['thread'])
 		confirm_path(self.path)
@@ -263,13 +262,9 @@ class Downloader(threading.Thread):
 		temp_time = current_time()
 
 		#Fetch current thread
-		data = None
 		cur_thread = {}
-		with downoader_semaphore:
-			#print(url)
-			data = download_html(url)
-			#debug_v(data)
-			#sleep_for(0.2)
+		thread_data = {}
+		data = download_html(url)
 
 
 		#Check if there was a problem
@@ -399,6 +394,8 @@ class Downloader(threading.Thread):
 			#print("8/b/ thread detected")
 			media_temp_path = media_temp_path.replace('media.', '')
 
+		confirm_path(str(self.path / "thumb"))
+
 		for post in thread['posts']:
 			#If the post indicates it has attached media, 
 			if 'tim' in post:
@@ -417,7 +414,6 @@ class Downloader(threading.Thread):
 
 				#Parse media link
 				filename = str(post['tim']) + post['ext']
-				#print("Accessing",filename)
 				dlfile(media_temp_path + filename, str(self.path / filename))
 
 				if 'extra_files' in post:
@@ -533,7 +529,11 @@ def process_updated_subscriptions():
 
 	subscribe['dead'].extend(new_dead)
 
-	print("New dead are:")
+	if len(new_dead) == 0:
+		print("No threads died this session")
+		return
+
+	print("New dead threads are:")
 
 	for item in new_dead:
 		domain = item['domain']

@@ -260,7 +260,6 @@ if __name__ == '__main__':
 
 	#1 Load subscription object
 	load_subscribe_object()
-	print("Current Subscriptions loaded...")
 
 	app = QApplication(sys.argv)
 	dialog = Dialog()
@@ -270,7 +269,6 @@ if __name__ == '__main__':
 	print("Flushing updated subscription data...")
 	process_updated_subscriptions()
 
-	print("Saving updated subscription data...")
 	save_subscribe_object()
 
 	sys.exit()

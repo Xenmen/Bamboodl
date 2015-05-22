@@ -59,7 +59,6 @@ def bamboodl_run():
 
 	#1 Load new urls list, delete list, put new URLs into watched.json under 'new', save watched.json
 	load_subscribe_object()
-	print("Current Subscriptions loaded...")
 	load_newsubs()
 	print("New subscriptions loaded...")
 	#reprocess_the_dead()
@@ -85,9 +84,7 @@ def bamboodl_run():
 	print("Updated subscriptions processed...")
 
 	#5 Save to disk
-	print("Saving updated subscription data...")
 	save_subscribe_object()
-	print("Complete.")
 
 
 #	#	#

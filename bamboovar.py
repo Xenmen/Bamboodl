@@ -215,7 +215,7 @@ def load_user_settings():
 		#Initialize it.
 		init_user_settings()
 
-	print("Settings loaded...")
+	print("\n\n\t###\t###\t###\t###\n\tSettings File Loaded\n\t###\t###\t###\t###\n")
 
 load_user_settings()
 

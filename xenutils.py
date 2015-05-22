@@ -174,11 +174,11 @@ def download_html(src):
 			html = resp.read().decode('utf-8')
 			return html
 	except (IOError,OSError) as error:
-		debug("File Error:",error)
-		#debug("URL was:", src)
-		#debug("Path was:", filename)
+		print("File Error:",error)
+		#debug("URL was: " + src)
+		#debug("Path was: " + filename)
 	except socket.timeout:
-		debug("File",src,"timed out")
+		print("File",src,"timed out")
 	return None
 
 def download_soup(src):
@@ -198,11 +198,11 @@ def dlfile(src,filename):
 			f.write(resp.read())
 			debug_v("Finished " + src)
 	except (IOError,OSError) as error:
-		debug("File Error:",error)
-		#debug("URL was:", src)
-		#debug("Path was:", filename)
+		print("File Error:",error)
+		debug("URL was: " + src)
+		debug("Path was: " + filename)
 	except socket.timeout:
-		debug("File",src,"timed out")
+		print("File",src,"timed out")
 
 ##
 #BEAUTIFUL SOUP HANDLING
