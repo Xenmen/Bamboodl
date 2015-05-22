@@ -36,7 +36,7 @@ from xenutils import *
 from bamboovar import paths, opener
 from bamboovar import config, subscribe
 from bamboovar import dom_4chan, dom_8chan, dom_wizchan, dom_tumblr, dom_newgrounds, dom_deviantart, dom_furaffinity, dom_inkbunny
-from bamboovar import domains_imageboards
+from bamboovar import domains_imageboards, domains_imageboards_html_scrape
 from bamboovar import key_regex, key_reg_replace
 from bamboovar import config_default, subscribe_default, upgrade_config, threads
 from bamboovar import total_json, skipped, new_watch, new_dead
@@ -166,51 +166,6 @@ def reprocess_the_dead():
 
 	save_subscribe_object()
 
-class Post(object):
-	"""docstring for Post"""
-	def __init__(self,
-			post_no='no',
-			poster_name='name',
-			timestamp='time',
-			comment='com',
-			filename_internal='tim',
-			md5='md5',
-
-			segregated_op=False,
-			op_id='op',
-
-			multifile='extra_files',
-
-			thumb_path='https://<domain>/<board>/thumb/<filename>.jpg',
-			media_path='https://<domain>/<board>/src/<filename><ext>'
-		):
-		super(Post, self).__init__()
-		self.post_no = post_no
-		self.poster_name = poster_name
-		self.timestamp = timestamp
-		self.comment = comment
-		self.filename_internal=filename_internal
-		self.md5 = md5
-
-		self.segregated_op = segregated_op
-		self.op_id = op_id
-
-		self.multifile = multifile
-
-		self.thumb_path=thumb_path
-		self.media_path=media_path
-
-post_styles = {
-	dom_4chan:Post(
-		thumb_path="https://i.4cdn.org/<board>/<filename>s.jpg",
-		media_path="https://i.4cdn.org/<board>/<filename><ext>"),
-	dom_8chan:Post(
-		thumb_path='https://media.<domain>/<board>/thumb/<filename>.jpg',
-		media_path='https://media.<domain>/<board>/src/<filename><ext>'),
-	dom_wizchan:Post(
-		thumb_path="https://<domain>/<board>/thumb/<filename>.gif")
-}
-
 ##
 #THREADS
 ##
@@ -225,9 +180,6 @@ class Downloader(threading.Thread):
 		self.early_end = False
 		self.dead = False
 		self.path = ""
-
-		#imageboard data
-		self.post_standard = {}
 
 	def run(self):
 		global subscribe_threadlock, checked_threads_threadlock
@@ -245,7 +197,6 @@ class Downloader(threading.Thread):
 			debug("Now on: " + self.subscription['url'])
 
 			if domain in domains_imageboards:
-				self.post_standard = post_styles[domain]
 				self.dl_imageboard()
 
 			elif domain == dom_tumblr:
@@ -296,7 +247,7 @@ class Downloader(threading.Thread):
 					done = True
 
 	def dl_imageboard(self):
-		global downoader_semaphore, config
+		global downoader_semaphore, config, domains_imageboards_html_scrape
 
 		url = self.subscription['url']
 
@@ -316,7 +267,7 @@ class Downloader(threading.Thread):
 		cur_thread = {}
 		with downoader_semaphore:
 			#print(url)
-			data = download_text(url)
+			data = download_html(url)
 			#debug_v(data)
 			#sleep_for(0.2)
 
@@ -350,14 +301,14 @@ class Downloader(threading.Thread):
 			try:
 
 				#See if it's a fucked up 4chan thread and do an early exit
-				if self.post_standard.post_no not in cur_thread['posts'][-1]:
+				if 'no' not in cur_thread['posts'][-1]:
 					print("\tSorry, this 4chan thread has fucked up json.")
 					print("\tThread is: " + self.subscription['url'])	
 					self.dead = True
 					return
 
 				#Calculate the timestamp of the most recent post
-				new_update_time = float(cur_thread['posts'][-1][self.post_standard.timestamp])
+				new_update_time = float(cur_thread['posts'][-1]['time'])
 
 				#If it's the same as the last time we checked...
 				if new_update_time == self.subscription['last_updated']:
@@ -394,7 +345,7 @@ class Downloader(threading.Thread):
 
 				#Report the post on
 				print("Latest post has no timestamp!\nThread is: " + self.subscription['url'])
-				#print("The latest post is #: " + str(cur_thread['posts'][-1][self.post_standard.post_no]))
+				#print("The latest post is #: " + str(cur_thread['posts'][-1]['no']))
 
 				#raise e
 
@@ -409,68 +360,11 @@ class Downloader(threading.Thread):
 		#Now parse media
 		self.dl_thread_media(thread)
 
-	def dlfile(self, url, path, filename, overwrite=False):
-		if not confirm_path(path):
-			debug("\tDL Path unaccessible!\n\tPath is: " + str(path))
-			return False
-		
-		# Open our local file for writing
-		#with open(os.path.basename(url), "wb") as local_file:
-		
-		#Parse local filename
-		if filename==None:
-			filename=os.path.basename(url)
-		#filepath=os.path.join(path, filename + os.path.splitext(url)[1])
-		filepath=os.path.join(str(path), filename)
-		
-		#Skip downloading if the file exists
-		if os.path.isfile(filepath) and not overwrite:
-			#debug("File exists:" + filename)
-			return True
-		
-		#print filepath
-		
-		# Open the url
-		try:
-			
-			#Create a temporary version, so that when we save the file to disk we have no risk of a partially downloaded file
-			#TODO: Consider not doing this for webms, since they may be of a much larger size than images
-			temp_storage=download_raw(url)
-
-			if temp_storage == None:
-				print("File is blank/invalid.")
-				return False
-			
-			#Save the file to disk
-			with open(filepath, "wb") as local_file:
-				local_file.write(temp_storage)
-			return True
-		
-		#handle errors ()
-		except HTTPError as e:
-				print("HTTP Error:" + str(e.code) + url)
-				return False
-		except URLError as e:
-				print("URL Error:" + url)
-				print(e)
-				return False
-		except Exception as e:
-				print("Unhandled Error for: " + url)
-				print(e)
-				#print(e.reason)
-				return False
-
 	def dl_thread_media(self, thread):
 		global downoader_semaphore, dom_8chan
 
 		thumbs = []
 		media = []
-
-		if self.post_standard.segregated_op:
-			op = thread[self.post_standard.op_id]
-			debug_v("Handling OP file(s)!")
-
-			#self.path
 
 		debug_v("Getting media for: " + self.subscription['url'])
 		if 'posts' not in thread:
@@ -478,10 +372,27 @@ class Downloader(threading.Thread):
 			print(self.subscription['url'])
 			print(thread)
 
-		#Prepare the template media path
-		media_temp_path = self.post_standard.media_path
-
 		domain = self.subscription['domain']
+
+		#Prepare the template media thumbnail path
+		urls_thumb = {
+			dom_4chan:"https://i.4cdn.org/<board>/",
+			dom_8chan:"https://media.8ch.net/<board>/thumb/",
+			dom_wizchan:"https://wizchan.org/<board>/thumb/"
+		}[domain]
+
+		filename_thumb = {
+			dom_4chan:"<filename>s.jpg",
+			dom_8chan:"<filename>.jpg",
+			dom_wizchan:"<filename>.gif"
+		}[domain]
+
+		#Prepare the template media path
+		media_temp_path = {
+			dom_4chan:"https://i.4cdn.org/<board>/",
+			dom_8chan:'https://media.8ch.net/<board>/src/',
+			dom_wizchan:'https://wizchan.org/<board>/src/'
+		}[domain]
 
 		#8/b/ media links are weird, they're not on the media.8ch.net subdomain, but right on 8ch.net...
 		if domain == dom_8chan and self.subscription['board'] in ['b', 'sp', 'v', 'pol']:
@@ -489,66 +400,41 @@ class Downloader(threading.Thread):
 			media_temp_path = media_temp_path.replace('media.', '')
 
 		for post in thread['posts']:
-			if self.post_standard.filename_internal in post:
+			#If the post indicates it has attached media, 
+			if 'tim' in post:
 
 				#If the file's been deleted, we can't download it! Otherwise, download.
-				if post['ext'] != 'deleted':
+				if post['ext'] == 'deleted': continue
 
-					#8chan does not create thumbs for GIF images
-					#if post['ext'] != '.gif' or domain != dom_8chan:
-					#Correction, 8ch has a strange means of generating thumbs; under some circumstances (OP only if the full image is png?) the thumb will be png, so just forget thumbs for 8ch for now.
-					if domain != dom_8chan:
+				#8chan does not create thumbs for GIF images
+				#if post['ext'] != '.gif' or domain != dom_8chan:
+				#Correction, 8ch has a strange means of generating thumbs; under some circumstances (OP only if the full image is png?) the thumb will be png, so just forget thumbs for 8ch for now.
+				if domain != dom_8chan:
 
-						#Parse thumb link
-						thumbs.append(self.post_standard.thumb_path.replace('<domain>', domain).replace('<board>', self.subscription['board']).replace('<filename>', str(post[self.post_standard.filename_internal])).replace('<ext>', post['ext']))
+					#Parse thumb link
+					filename = filename_thumb.replace('<filename>', str(post['tim']))
+					link = urls_thumb.replace('<board>', self.subscription['board']) + filename
+					dlfile(link, str(self.path / "thumb" / filename))
 
-					#Parse media link
-					media.append(media_temp_path.replace('<domain>', domain).replace('<board>', self.subscription['board']).replace('<filename>', str(post[self.post_standard.filename_internal])).replace('<ext>', post['ext']))
+				#Parse media link
+				filename = str(post['tim']) + post['ext']
+				link = media_temp_path.replace('<board>', self.subscription['board']) + filename
+				dlfile(link, str(self.path / filename))
 
-				if self.post_standard.multifile in post:
+				if 'extra_files' in post:
 					debug_v("There's more than one file in this post!")
-					for item in post[self.post_standard.multifile]:
+					for item in post['extra_files']:
 
 						#If the file's been deleted, we can't download it! Otherwise, download.
 						if item['ext'] == 'deleted': continue
 
-						#8chan does not create thumbs for GIF images
-						#if item['ext'] != '.gif' or domain != dom_8chan:
-						#Correction, 8ch has a strange means of generating thumbs; under some circumstances (OP only if the full image is png?) the thumb will be png, so just forget thumbs for 8ch for now.
-						if domain != dom_8chan:
-
-							#Parse thumb link
-							thumbs.append(self.post_standard.thumb_path.replace('<domain>', domain).replace('<board>', self.subscription['board']).replace('<filename>', str(item[self.post_standard.filename_internal])).replace('<ext>', '.jpg'))
-
 						#Parse media link
-						media.append(media_temp_path.replace('<domain>', domain).replace('<board>', self.subscription['board']).replace('<filename>', str(item[self.post_standard.filename_internal])).replace('<ext>', item['ext']))
+						link = media_temp_path.replace('<domain>', domain).replace('<board>', self.subscription['board']).replace('<filename>', str(item['tim'])).replace('<ext>', item['ext'])
+						filename = str(item['tim']) + item['ext']
+						dlfile(link, str(self.path / filename))
 			else:
 				pass
 				debug_v("\t'no files'")
-	
-		#
-		#DOWNLOAD MEDIA
-		#
-		
-		with downoader_semaphore:
-			#dl all thumbs
-			for link in thumbs:
-				debug_v("getting thumbnail: " + link)
-				patience = 5
-				while not self.dlfile(link, self.path / "thumb", None, overwrite=False) and patience > 0:
-					patience -= 1
-					debug("Failed to download thumb image: " + link)
-					#print("Current url is: " + self.subscription['url'])
-					#break
-			
-			#Download all the media
-			for link in media:
-				debug_v("getting image: " + link)
-				patience = 5
-				while not self.dlfile(link, self.path, None, overwrite=False) and patience > 0:
-					patience -= 1
-					debug("Failed to download image: " + link)
-		#
 
 	def failure_connection(self):
 		pass
@@ -599,7 +485,7 @@ def check_everything():
 
 	#print("\n\n\nHEYO TIME TO WORKO")
 	
-	one_layer = ['tumblr.com', 'newgrounds.com', 'deviantart.com']
+	one_layer = []#'tumblr.com', 'newgrounds.com', 'deviantart.com']
 	two_layer = domains_imageboards
 
 	for key in one_layer:

@@ -11,6 +11,7 @@
 ##
 import json
 import os
+import socket,concurrent.futures,sys
 import re
 import time
 import datetime
@@ -20,8 +21,11 @@ from pathlib import Path
 from urllib import request
 from pathlib import Path
 from urllib import request
-from urllib.error import URLError, HTTPError
+
+from urllib.error import *
 from urllib.parse import urlparse
+from urllib.request import Request
+from urllib.request import urlopen
 
 ##
 #pip3 install
@@ -160,62 +164,45 @@ def extract_root_domain_from_url(url):
 		return None
 		#raise e
 
-def download_text(url):
+def download_html(src):
 	#if-modified-since header seems to be ignored
-	
-	html=None
-	tries = 0
-	trying = True
-	while trying:
-		try:
-			#Download the webpage and parse it nicely
-			html=request.urlopen(url, None, 5.0).read().decode('utf-8')
-			trying = False
-		#Check for redirect
-		except Exception as e:
-			debug_v("The link appears to be down, oh well!\n")
-			if tries < 5:
-				debug_v(e)
-				tries += 1
-				trying=True
-			else:
-				debug(str(tries) + " tries failed, no longer retrying...")
-				debug(e)
-				trying = False
-	return html
 
-def download_raw(url):
-	#if-modified-since header seems to be ignored
-	
-	html=None
-	tries = 0
-	trying = True
-	while trying:
-		try:
-			#Download the webpage and parse it nicely
-			html=request.urlopen(url, None, 5.0).read()
-			trying = False
-		#Check for redirect
-		except Exception as e:
-			debug_v("The link appears to be down, oh well!\n")
-			if tries < 5:
-				debug_v(e)
-				tries += 1
-				trying=True
-			else:
-				debug(str(tries) + " tries failed, no longer retrying...")
-				debug(e)
-				trying = False
-	return html
+	try:
+		#Download the webpage and parse it nicely
+		with urlopen(Request(src,headers={"User-Agent": "Mozilla 5.0"}),timeout=300) as resp:
+			debug_v("Downloading " + src)
+			html = resp.read().decode('utf-8')
+			return html
+	except (IOError,OSError) as error:
+		debug("File Error:",error)
+		#debug("URL was:", src)
+		#debug("Path was:", filename)
+	except socket.timeout:
+		debug("File",src,"timed out")
+	return None
 
-def download_soup(url):
+def download_soup(src):
 
-	parsed_text=download_text(url)
+	parsed_text=download_html(src)
 	
-	if parsed_text != None:
-		return BeautifulSoup(strip_unicode_east_asia(parsed_text))
-	else:
-		return None
+	if parsed_text == None: return None
+	
+	return BeautifulSoup(strip_unicode_east_asia(parsed_text))
+		
+
+def dlfile(src,filename):
+	try:
+		if os.path.isfile(str(filename)): return
+		with urlopen(Request(src,headers={"User-Agent": "Mozilla 5.0"}),timeout=300) as resp, open(filename,"wb") as f:
+			debug_v("Downloading " + src)
+			f.write(resp.read())
+			debug_v("Finished " + src)
+	except (IOError,OSError) as error:
+		debug("File Error:",error)
+		#debug("URL was:", src)
+		#debug("Path was:", filename)
+	except socket.timeout:
+		debug("File",src,"timed out")
 
 ##
 #BEAUTIFUL SOUP HANDLING

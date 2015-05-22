@@ -48,18 +48,6 @@ paths = {
 	'path_newsubs':dir_settings / "new.txt",
 	'path_subscribe':dir_settings / "subscribed.json"
 }
-#dir_downloads=Path(path.expanduser("~/Downloads/bamboodl/"))
-#dir_downloads=Path(path.expanduser("/VOLUMES/GITSTICK/Downloads/"))
-
-##
-#URL HANDLING
-##
-#This is to circumvent Newgrounds' and 4Chan's anti-automated-downloads policy
-##
-speed_throttle = 75
-opener = request.build_opener()
-opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-request.install_opener(opener)
 
 ##
 #ACCEPTED ROOT DOMAINS
@@ -238,7 +226,7 @@ load_user_settings()
 reg_start=r"(?:https?:\/\/)?(?:www\.)?"
 
 key_regex = {
-	dom_4chan:reg_start+r"boards\." + dom_4chan + r"/(\w+)/thread/([0-9]+)((?:\.json)|/?(?:[a-zA-Z-]*))(?:#q?[0-9]+)?",
+	dom_4chan:reg_start+r"boards\." + dom_4chan + r"/(\w+)/thread/([0-9]+)((?:\.json)|/?(?:/[a-zA-Z0-9-]*))?(?:#q?[0-9]+)?",
 	dom_8chan:reg_start+r"8ch.net/([a-zA-Z0-9-+]*)/res/?([0-9]+)(?:(?:.html)|(?:.json))(?:#q?[0-9]+)?",
 	dom_wizchan:reg_start+r"wizchan.org/([a-zA-Z0-9-+]*)/res/?([0-9]+)(?:(?:.html)|(?:.json))(?:#q?[0-9]+)?",
 	dom_tumblr:reg_start+r"([a-zA-Z0-9-]*)\." + dom_tumblr + "\/?(?:tagged\/)?([a-zA-Z0-9-_+=#]*)",
