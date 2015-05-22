@@ -59,6 +59,7 @@ def init_user_subscribe_list():
 def load_subscribe_object():
 	global paths, subscribe
 
+	debug("\n\n\t###\t#\t#\t#\n\tLOADING SUBSCRIPTIONS OBJECT\n\t#\t#\t#\t###\n")
 	if paths['path_subscribe'].exists():
 		#print("\n\n\nLOADINGGGGG")
 		subscribe = j_load(paths['path_subscribe'])
@@ -73,8 +74,7 @@ def load_subscribe_object():
 def save_subscribe_object():
 	global paths, subscribe
 
-	debug("\n\n\nSAVING SUBSCRIPTIONS OBJECT")
-	debug_v(subscribe)
+	debug("\n\n\t###\t#\t#\t#\n\tSAVING SUBSCRIPTIONS OBJECT\n\t#\t#\t#\t###\n")
 	j_save(paths['path_subscribe'], subscribe)
 
 def add_json_to_subscribe(new_json):
@@ -379,12 +379,12 @@ class Downloader(threading.Thread):
 			dom_4chan:"https://i.4cdn.org/<board>/",
 			dom_8chan:"https://media.8ch.net/<board>/thumb/",
 			dom_wizchan:"https://wizchan.org/<board>/thumb/"
-		}[domain]
+		}[domain].replace('<board>', self.subscription['board'])
 
-		filename_thumb = {
-			dom_4chan:"<filename>s.jpg",
-			dom_8chan:"<filename>.jpg",
-			dom_wizchan:"<filename>.gif"
+		file_ext_thumb = {
+			dom_4chan:"s.jpg",
+			dom_8chan:".jpg",
+			dom_wizchan:".gif"
 		}[domain]
 
 		#Prepare the template media path
@@ -392,7 +392,7 @@ class Downloader(threading.Thread):
 			dom_4chan:"https://i.4cdn.org/<board>/",
 			dom_8chan:'https://media.8ch.net/<board>/src/',
 			dom_wizchan:'https://wizchan.org/<board>/src/'
-		}[domain]
+		}[domain].replace('<board>', self.subscription['board'])
 
 		#8/b/ media links are weird, they're not on the media.8ch.net subdomain, but right on 8ch.net...
 		if domain == dom_8chan and self.subscription['board'] in ['b', 'sp', 'v', 'pol']:
@@ -412,14 +412,13 @@ class Downloader(threading.Thread):
 				if domain != dom_8chan:
 
 					#Parse thumb link
-					filename = filename_thumb.replace('<filename>', str(post['tim']))
-					link = urls_thumb.replace('<board>', self.subscription['board']) + filename
-					dlfile(link, str(self.path / "thumb" / filename))
+					filename = str(post['tim']) + file_ext_thumb
+					dlfile(urls_thumb + filename, str(self.path / "thumb" / filename))
 
 				#Parse media link
 				filename = str(post['tim']) + post['ext']
-				link = media_temp_path.replace('<board>', self.subscription['board']) + filename
-				dlfile(link, str(self.path / filename))
+				#print("Accessing",filename)
+				dlfile(media_temp_path + filename, str(self.path / filename))
 
 				if 'extra_files' in post:
 					debug_v("There's more than one file in this post!")
@@ -429,15 +428,9 @@ class Downloader(threading.Thread):
 						if item['ext'] == 'deleted': continue
 
 						#Parse media link
-						link = media_temp_path.replace('<domain>', domain).replace('<board>', self.subscription['board']).replace('<filename>', str(item['tim'])).replace('<ext>', item['ext'])
 						filename = str(item['tim']) + item['ext']
-						dlfile(link, str(self.path / filename))
-			else:
-				pass
-				debug_v("\t'no files'")
-
-	def failure_connection(self):
-		pass
+						#print("Accessing",filename)
+						dlfile(media_temp_path + filename, str(self.path / filename))
 
 def seconds_since_last_checked(subscription):
 
