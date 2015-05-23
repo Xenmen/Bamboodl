@@ -24,7 +24,7 @@ from xenutils import *
 
 from bambootil import subscribe
 from bambootil import load_subscribe_object, save_subscribe_object, load_newsubs, reprocess_the_dead
-from bambootil import check_everything, spawn_downloaders, join_downloaders, process_updated_subscriptions
+from bambootil import check_everything, spawn_downloaders, check_imageboards
 
 #
 
@@ -68,20 +68,16 @@ def bamboodl_run():
 	#2 Spawn Fetch threads for everything, run through regular link list by date, seeing if wait time has been reached, and if so spawn a Fetch thread
 	from bambootil import subscribe
 	print("Preparing to check...")
-	check_everything()
+	check_imageboards()
 	print("Prepared to check...")
 	spawn_downloaders()
 	print("Downloaders spawned...")
 
 	#3 Wait for those threads to join again~
 	print("Running downloaders...")
-	join_downloaders()
-	print("Downloaders have exited...")
-
-	#4 Process the updated subscription data
-	print("Processing the updated subscriptions...")
-	process_updated_subscriptions()
-	print("Updated subscriptions processed...")
+	from bambootil import total_json
+	while total_json:
+		time.sleep(1)
 
 	#5 Save to disk
 	save_subscribe_object()

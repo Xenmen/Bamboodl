@@ -69,14 +69,14 @@ from xenutils import *
 
 #
 
-from bambootil import subscribe,  Downloader
 from bambootil import load_subscribe_object, save_subscribe_object, load_newsubs, add_json_to_subscribe, watch_subscription_or_dont, reprocess_the_dead
-from bambootil import check_everything, spawn_downloaders, join_downloaders, process_updated_subscriptions
+from bambootil import check_everything, spawn_downloaders, check_imageboards
 
 #
 
 from bamboovar import dom_4chan, dom_8chan, dom_tumblr, dom_newgrounds, dom_deviantart, dom_furaffinity
 from bamboovar import key_regex, key_reg_replace
+from bamboovar import checked_threads_threadlock
 
 class Dialog(QDialog):
 	NumGridRows = 3
@@ -139,10 +139,11 @@ class Dialog(QDialog):
 	##
 
 	def set_label_text_register(self, new_text):
+
 		self.label_new_url_debug.setText(new_text)
 
 	def click_process_new_url(self):
-		global subscribe, paths, key_regex, key_reg_replace
+		global paths, key_regex, key_reg_replace
 
 		line = self.text_input_new_url.text()
 
@@ -204,29 +205,25 @@ class Dialog(QDialog):
 	#Running Bamboodl Update
 	##
 
-	def run_downloader(self):
-		self.running = True
-
-		#2 Spawn Fetch threads for everything, run through regular link list by date, seeing if wait time has been reached, and if so spawn a Fetch thread
-		self.set_label_text_download("Preparing to download. . .")
-		check_everything()
-		spawn_downloaders()
-
-		#3 Wait for those threads to join again~
-		self.append_label_text_download("Downloading. . .")
-		join_downloaders()
-		self.append_label_text_download("Done downloading.")
-		self.append_label_text_download("Updating subscriptions. . .")
-		process_updated_subscriptions()
-		self.append_label_text_download("Done updating.")
-
-		self.running = False
-
 	def set_label_text_download(self, new_text):
+
 		self.label_download_debug.setText(new_text)
 
 	def append_label_text_download(self, new_text):
+
 		self.label_download_debug.setText(self.label_download_debug.text() + '\n' + new_text)
+
+	def run_downloader(self):
+
+		self.running = True
+
+		self.set_label_text_download("Preparing to download. . .")
+		check_imageboards()
+		self.append_label_text_download("Downloading. . .")
+		spawn_downloaders()
+		self.append_label_text_download("Done downloading.")
+
+		self.running = False
 
 	def click_process_download(self):
 
@@ -266,9 +263,11 @@ if __name__ == '__main__':
 
 	dialog.exec_()
 
-	print("Flushing updated subscription data...")
-	process_updated_subscriptions()
 
-	save_subscribe_object()
+
+	#And update the main record
+	print("Flushing updated subscription data...")
+	with checked_threads_threadlock:
+		save_subscribe_object()
 
 	sys.exit()

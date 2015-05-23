@@ -11,7 +11,8 @@
 ##
 import json
 import os
-import socket,concurrent.futures,sys
+import socket
+import sys
 import re
 import time
 import datetime
@@ -188,7 +189,6 @@ def download_soup(src):
 	if parsed_text == None: return None
 	
 	return BeautifulSoup(strip_unicode_east_asia(parsed_text))
-		
 
 def dlfile(src,filename):
 	try:
@@ -199,8 +199,8 @@ def dlfile(src,filename):
 			debug_v("Finished " + src)
 	except (IOError,OSError) as error:
 		print("File Error:",error)
-		debug("URL was: " + src)
-		debug("Path was: " + filename)
+		#debug("URL was: " + src)
+		#debug("Path was: " + filename)
 	except socket.timeout:
 		print("File",src,"timed out")
 
