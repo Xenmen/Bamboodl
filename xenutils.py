@@ -170,7 +170,7 @@ def download_html(src):
 
 	try:
 		#Download the webpage and parse it nicely
-		with urlopen(Request(src,headers={"User-Agent": "Mozilla 5.0"}),timeout=300) as resp:
+		with urlopen(Request(src,headers={"User-Agent": "Mozilla 5.0"}),timeout=10) as resp:
 			debug_v("Downloading " + src)
 			html = resp.read().decode('utf-8')
 			return html
@@ -193,7 +193,8 @@ def download_soup(src):
 def dlfile(src,filename):
 	try:
 		if os.path.isfile(str(filename)): return
-		with urlopen(Request(src,headers={"User-Agent": "Mozilla 5.0"}),timeout=300) as resp, open(filename,"wb") as f:
+		#confirm_path(filename)
+		with urlopen(Request(src,headers={"User-Agent": "Mozilla 5.0"}),timeout=10) as resp, open(filename,"wb") as f:
 			debug_v("Downloading " + src)
 			f.write(resp.read())
 			debug_v("Finished " + src)

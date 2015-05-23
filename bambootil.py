@@ -36,7 +36,7 @@ from xenutils import *
 #from bamboovar import debug_log, debug_print, debug_verbose
 from bamboovar import paths
 from bamboovar import config, subscribe
-from bamboovar import dom_4chan, dom_8chan, dom_wizchan, dom_tumblr, dom_newgrounds, dom_deviantart, dom_furaffinity, dom_inkbunny
+from bamboovar import dom_4chan, dom_8chan, dom_wizchan, dom_lainchan, dom_tumblr, dom_newgrounds, dom_deviantart, dom_furaffinity, dom_inkbunny
 from bamboovar import domains_imageboards, domains_imageboards_html_scrape, domains_imageboards_json_capable
 from bamboovar import key_regex, key_reg_replace
 from bamboovar import config_default, subscribe_default, upgrade_config
@@ -45,6 +45,8 @@ from bamboovar import subscribe_threadlock, checked_threads_threadlock
 
 
 #	#	#
+
+force_check_all = False
 
 ##
 #SUBSCRIPTIONS
@@ -181,11 +183,11 @@ def time_to_update(subscription):
 	return seconds_since_last_checked(subscription['last_checked']) > subscription['wait_time']
 
 def watch_subscription_or_dont(subscription):
-	global total_json, subscribe_threadlock
+	global total_json, subscribe_threadlock, force_check_all
 
 	with subscribe_threadlock:
 	
-		if time_to_update(subscription):
+		if force_check_all or time_to_update(subscription):
 			total_json.append(subscription)
 
 def fetch_l1_json(domain):
@@ -375,20 +377,23 @@ def chandl(subscription):
 	urls_thumb = {
 		dom_4chan:"https://i.4cdn.org/<board>/",
 		dom_8chan:"https://media.8ch.net/<board>/thumb/",
-		dom_wizchan:"https://wizchan.org/<board>/thumb/"
+		dom_wizchan:"https://wizchan.org/<board>/thumb/",
+		dom_lainchan:"https://lainchan.org/<board>/thumb/"
 	}[domain].replace('<board>', subscription['board'])
 
 	file_ext_thumb = {
 		dom_4chan:"s.jpg",
 		dom_8chan:".jpg",
-		dom_wizchan:".gif"
+		dom_wizchan:".gif",
+		dom_lainchan:".png"
 	}[domain]
 
 	#Prepare the template media path
 	media_temp_path = {
 		dom_4chan:"https://i.4cdn.org/<board>/",
 		dom_8chan:'https://media.8ch.net/<board>/src/',
-		dom_wizchan:'https://wizchan.org/<board>/src/'
+		dom_wizchan:'https://wizchan.org/<board>/src/',
+		dom_lainchan:'https://lainchan.org/<board>/src/'
 	}[domain].replace('<board>', subscription['board'])
 
 	#8/b/ media links are weird, they're not on the media.8ch.net subdomain, but right on 8ch.net...
@@ -462,7 +467,6 @@ def spawn_downloaders():
 
 			#and 
 			pool.submit(downloaders[subscription['domain']],subscription)
-
 
 
 #	#	#
