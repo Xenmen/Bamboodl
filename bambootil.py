@@ -34,14 +34,14 @@ from xenutils import *
 #
 
 #from bamboovar import debug_log, debug_print, debug_verbose
-from bamboovar import paths, opener
+from bamboovar import paths
 from bamboovar import config, subscribe
 from bamboovar import dom_4chan, dom_8chan, dom_wizchan, dom_tumblr, dom_newgrounds, dom_deviantart, dom_furaffinity, dom_inkbunny
-from bamboovar import domains_imageboards, domains_imageboards_html_scrape
+from bamboovar import domains_imageboards, domains_imageboards_html_scrape, domains_imageboards_json_capable
 from bamboovar import key_regex, key_reg_replace
-from bamboovar import config_default, subscribe_default, upgrade_config, threads
-from bamboovar import total_json, skipped, new_watch, new_dead
-from bamboovar import subscribe_threadlock, downoader_semaphore, checked_threads_threadlock
+from bamboovar import config_default, subscribe_default, upgrade_config
+from bamboovar import total_json
+from bamboovar import subscribe_threadlock, checked_threads_threadlock
 
 
 #	#	#
@@ -71,12 +71,12 @@ def load_subscribe_object():
 	if 'dead' not in subscribe:
 		subscribe['dead'] = []
 
-	debug("\n\n\t###\t###\t###\t###\n\tSubscriptions Object Loaded\n\t###\t###\t###\t###\n")
+	debug("\n\n\t###\t\t\t###\n\tSubscriptions Object Loaded\n\t###\t\t\t###\n")
 
 def save_subscribe_object():
 	global paths, subscribe
 
-	debug("\n\n\t###\t###\t###\t###\n\tSubscriptions Object Saved\n\t###\t###\t###\t###\n")
+	debug("\n\n\t###\t\t\t###\n\tSubscriptions Object Saved\n\t###\t\t\t###\n")
 	j_save(paths['path_subscribe'], subscribe)
 
 def add_json_to_subscribe(new_json):
@@ -199,14 +199,12 @@ def fetch_l2_json(domain, board):
 	global subscribe
 
 	for item in subscribe[domain][board]:
-		subscription=subscribe[domain][board][item]
-		watch_subscription_or_dont(subscription)
+		watch_subscription_or_dont(subscribe[domain][board][item])
 
 def check_imageboards():
 	global subscribe, total_json, domains_imageboards
 
-	two_layer = domains_imageboards
-	for key in two_layer:
+	for key in domains_imageboards:
 		if key in subscribe:
 			for board in subscribe[key]:
 				fetch_l2_json(key, board)
@@ -231,6 +229,7 @@ def check_everything():
 ##
 
 def chandl_html(subscription, data):
+
 	pass
 
 def chandl(subscription):
@@ -244,7 +243,7 @@ def chandl(subscription):
 
 
 
-	global downoader_semaphore, config
+	global config
 
 	url = subscription['url']
 
@@ -258,8 +257,6 @@ def chandl(subscription):
 	temp_time = current_time()
 
 	#Fetch current thread
-	cur_thread = {}
-	thread_data = {}
 	data = download_html(url)
 
 	#Check if there was a problem
@@ -289,15 +286,15 @@ def chandl(subscription):
 		return
 
 	#Load old thread if we already have it
-	thread = {}
+	thread_data = {}
 	if subscription['last_updated'] != 0 and False:
-		thread = j_load(path / 'thread.json')
+		thread_data = j_load(path / 'thread.json')
 	#Otherwise, save the thread JSON before continuing
 	else:
 		j_save(path / 'thread.json', cur_thread)
 
 	#If the thread's current json is different from the old...
-	if not thread == cur_thread:
+	if not thread_data == cur_thread:
 		try:
 
 			#See if it's a fucked up 4chan thread and do an early exit
@@ -357,24 +354,22 @@ def chandl(subscription):
 			raise e
 
 	#TODO: update old_thread with cur_thread
-	thread = cur_thread
+	thread_data = cur_thread
 
 	#Now save the json
 	debug_v(path)
 	
-	j_save(path / 'thread.json', thread)
-
-
+	j_save(path / 'thread.json', thread_data)
 
 	#Now parse media
 	thumbs = []
 	media = []
 
 	debug_v("Getting media for: " + subscription['url'])
-	if 'posts' not in thread:
+	if 'posts' not in thread_data:
 		print("\n\n\nOH NOOOOO")
 		print(subscription['url'])
-		print(thread)
+		print(thread_data)
 
 	#Prepare the template media thumbnail path
 	urls_thumb = {
@@ -403,7 +398,7 @@ def chandl(subscription):
 
 	confirm_path(str(path / "thumb"))
 
-	for post in thread['posts']:
+	for post in thread_data['posts']:
 		#If the post indicates it has attached media, 
 		if 'tim' in post:
 
@@ -435,12 +430,10 @@ def chandl(subscription):
 					#print("Accessing",filename)
 					dlfile(media_temp_path + filename, str(path / filename))
 
-
-
 	#Thread is still live, and we're done downloading media, so record that we've just checked it,
 	subscription['last_checked'] = temp_time
 
-	#And update the main record
+	#And update the main Record
 	with checked_threads_threadlock:
 		subscribe[domain][subscription['board']][subscription['thread']] = subscription
 
@@ -456,7 +449,7 @@ downloaders = {
 }
 
 def spawn_downloaders():
-	global total_json, threads
+	global total_json
 
 	#Create a thread pool,
 	with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:

@@ -31,10 +31,6 @@ subscribe={}
 total_json = []
 skipped = []
 
-new_watch = []
-new_dead = []
-threads = []
-
 #PATHS
 
 dir_settings=Path(path.expanduser("~/_python/bamboodl/"))
@@ -56,6 +52,7 @@ paths = {
 dom_4chan="4chan.org"
 dom_8chan="8ch.net"
 dom_wizchan="wizchan.org"
+dom_lainchan="lainchan.org"
 
 dom_shanachan="shanachan.org"
 dom_krautchan="krautchan.net"
@@ -72,7 +69,8 @@ dom_pixiv="pixiv.net"
 domains_imageboards_json_capable=[
 	dom_4chan,
 	dom_8chan,
-	dom_wizchan
+	dom_wizchan,
+	dom_lainchan
 ]
 
 #These domains are imageboards that don't have a JSON API, so their thread's HTML must be scraped manually.
@@ -115,6 +113,7 @@ wait_times_default={
 	dom_4chan:[300,604800],					#5 minutes		- weekly
 	dom_8chan:[600,1209600],				#10 minutes		- bimonthly
 	dom_wizchan:[600,1209600],				#10 minutes		- bimonthly
+	dom_lainchan:[600,1209600],				#10 minutes		- bimonthly
 	dom_shanachan:[600,1209600],			#10 minutes		- bimonthly
 	dom_krautchan:[600,1209600],			#10 minutes		- bimonthly
 	dom_tumblr:[86400,2419200],				#daily			- monthly
@@ -210,12 +209,20 @@ def load_user_settings():
 			#And save the new config!
 			j_save(paths['path_conf'], config)
 
+		if dom_lainchan not in config["domains"]:
+			config["domains"][dom_lainchan] = config["domains"][dom_8chan]
+			config["domains"][dom_lainchan]["default"]['download_wip'] = str(Path(config["bamboodl"]["download_dir"]) / "lainchan")
+			config["domains"][dom_lainchan]["default"]['download_done'] = str(Path(config["bamboodl"]["complete_dir"]) / "lainchan")
+
+			#And save the new config!
+			j_save(paths['path_conf'], config)
+
 	#If there is no config file,
 	else:
 		#Initialize it.
 		init_user_settings()
 
-	print("\n\n\t###\t###\t###\t###\n\tSettings File Loaded\n\t###\t###\t###\t###\n")
+	print("\n\n\t###\t\t\t###\n\tSettings File Loaded\n\t###\t\t\t###\n")
 
 load_user_settings()
 
@@ -229,6 +236,7 @@ key_regex = {
 	dom_4chan:reg_start+r"boards\." + dom_4chan + r"/(\w+)/thread/([0-9]+)((?:\.json)|/?(?:/[a-zA-Z0-9-]*))?(?:#q?[0-9]+)?",
 	dom_8chan:reg_start+r"8ch.net/([a-zA-Z0-9-+]*)/res/?([0-9]+)(?:(?:.html)|(?:.json))(?:#q?[0-9]+)?",
 	dom_wizchan:reg_start+r"wizchan.org/([a-zA-Z0-9-+]*)/res/?([0-9]+)(?:(?:.html)|(?:.json))(?:#q?[0-9]+)?",
+	dom_lainchan:reg_start+r"lainchan.org/([a-zA-Z0-9-+]*)/res/?([0-9]+)(?:(?:.html)|(?:.json))(?:#q?[0-9]+)?",
 	dom_tumblr:reg_start+r"([a-zA-Z0-9-]*)\." + dom_tumblr + "\/?(?:tagged\/)?([a-zA-Z0-9-_+=#]*)",
 	dom_newgrounds:reg_start+r"([a-zA-Z0-9-]*)\." + dom_newgrounds + r"\/?",
 	dom_deviantart:reg_start+r"([a-zA-Z0-9-]*)\." + dom_deviantart + r"\/?",
@@ -249,6 +257,7 @@ key_reg_replace={
 	dom_4chan:rep_start + r'"4chan.org",\n\t"board":"\g<1>",\n\t"thread":"\g<2>",\n\t"url":"https://boards.4chan.org/\g<1>/thread/\g<2>.json",\n\t"wait_time":' + str(config['domains'][dom_4chan]['default']['wait_time'][0]) + rep_stop,
 	dom_8chan:rep_start + r'"8ch.net",\n\t"board":"\g<1>",\n\t"thread":"\g<2>",\n\t"url":"https://8ch.net/\g<1>/res/\g<2>.json",\n\t"wait_time":' + str(config['domains'][dom_8chan]['default']['wait_time'][0]) + rep_stop,
 	dom_wizchan:rep_start + r'"wizchan.org",\n\t"board":"\g<1>",\n\t"thread":"\g<2>",\n\t"url":"https://wizchan.org/\g<1>/res/\g<2>.json",\n\t"wait_time":' + str(config['domains'][dom_wizchan]['default']['wait_time'][0]) + rep_stop,
+	dom_lainchan:rep_start + r'"lainchan.org",\n\t"board":"\g<1>",\n\t"thread":"\g<2>",\n\t"url":"https://lainchan.org/\g<1>/res/\g<2>.json",\n\t"wait_time":' + str(config['domains'][dom_lainchan]['default']['wait_time'][0]) + rep_stop,
 	dom_tumblr:rep_start + r'"tumblr.com",\n\t"account":"\g<1>",\n\t"url":"http://\g<1>.tumblr.com/",\n\t"tags":["\g<2>"],\n\t"wait_time":' + str(config['domains'][dom_tumblr]['default']['wait_time'][0]) + rep_stop,
 	dom_newgrounds:rep_start + r'"newgrounds.com",\n\t"account":"\g<1>",\n\t"url":"\g<0>",\n\t"wait_time":' + str(config['domains'][dom_newgrounds]['default']['wait_time'][0]) + rep_stop,
 	dom_deviantart:rep_start + r'"deviantart.com",\n\t"account":"\g<1>",\n\t"url":"\g<0>",\n\t"wait_time":' + str(config['domains'][dom_deviantart]['default']['wait_time'][0]) + rep_stop,
@@ -278,5 +287,3 @@ for domain in domains:
 #These are multithreading related variables; multithreading in Bamboodl will be heavily refactored later, so ignore these unless you're intent on doing that yourself. It'll be boring I asure you.
 subscribe_threadlock = Lock()
 checked_threads_threadlock = Lock()
-maxconnections = 3
-downoader_semaphore = BoundedSemaphore(value=maxconnections)

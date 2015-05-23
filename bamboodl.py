@@ -22,9 +22,7 @@ from xenutils import *
 
 #
 
-from bambootil import subscribe
-from bambootil import load_subscribe_object, save_subscribe_object, load_newsubs, reprocess_the_dead
-from bambootil import check_everything, spawn_downloaders, check_imageboards
+from bambootil import *
 
 #
 
@@ -69,6 +67,7 @@ def bamboodl_run():
 	from bambootil import subscribe
 	print("Preparing to check...")
 	check_imageboards()
+
 	print("Prepared to check...")
 	spawn_downloaders()
 	print("Downloaders spawned...")
