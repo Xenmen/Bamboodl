@@ -66,17 +66,11 @@ import threading
 ##
 
 from xenutils import *
+from bambootil import *
+from bamboovar import *
 
-#
 
-from bambootil import load_subscribe_object, save_subscribe_object, load_newsubs, add_json_to_subscribe, watch_subscription_or_dont, reprocess_the_dead
-from bambootil import check_everything, spawn_downloaders, check_imageboards
-
-#
-
-from bamboovar import dom_4chan, dom_8chan, dom_tumblr, dom_newgrounds, dom_deviantart, dom_furaffinity
-from bamboovar import key_regex, key_reg_replace
-from bamboovar import checked_threads_threadlock
+#	#	#
 
 class Dialog(QDialog):
 	NumGridRows = 3

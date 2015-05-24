@@ -30,18 +30,7 @@ from bs4 import BeautifulSoup
 ##
 
 from xenutils import *
-
-#
-
-#from bamboovar import debug_log, debug_print, debug_verbose
-from bamboovar import paths
-from bamboovar import config, subscribe
-from bamboovar import dom_4chan, dom_8chan, dom_wizchan, dom_lainchan, dom_tumblr, dom_newgrounds, dom_deviantart, dom_furaffinity, dom_inkbunny
-from bamboovar import domains_imageboards, domains_imageboards_html_scrape, domains_imageboards_json_capable
-from bamboovar import key_regex, key_reg_replace
-from bamboovar import config_default, subscribe_default, upgrade_config
-from bamboovar import total_json
-from bamboovar import subscribe_threadlock, checked_threads_threadlock
+from bamboovar import *
 
 
 #	#	#
@@ -194,8 +183,7 @@ def fetch_l1_json(domain):
 	global subscribe
 
 	for account in subscribe[domain]:
-		subscription = subscribe[domain][account]
-		watch_subscription_or_dont(subscription)
+		watch_subscription_or_dont(subscribe[domain][account])
 
 def fetch_l2_json(domain, board):
 	global subscribe
@@ -225,6 +213,11 @@ def check_everything():
 		if key in subscribe:
 			for board in subscribe[key]:
 				fetch_l2_json(key, board)
+
+def query_download_queue_empty():
+	global total_json
+
+	return len(total_json) == 0
 
 ##
 #Downloader - Imageboards

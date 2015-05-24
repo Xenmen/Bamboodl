@@ -19,16 +19,8 @@ from urllib import request
 ##
 
 from xenutils import *
-
-#
-
 from bambootil import *
-
-#
-
-from bamboovar import dom_4chan, dom_8chan, dom_tumblr, dom_newgrounds, dom_deviantart, dom_furaffinity
-from bamboovar import key_regex, key_reg_replace
-#from bambootil import extract_root_domain_from_url
+from bamboovar import *
 
 
 #	#	#
@@ -51,7 +43,7 @@ Desc:
 #Imageboard Threads have a minimum wait time of 30 seconds, tumblr accounts of 1hr, newgrounds accounts of 1 day
 ###
 
-def bamboodl_run():
+def bamboodl_load():
 
 	debug_enable()
 
@@ -62,30 +54,34 @@ def bamboodl_run():
 	#reprocess_the_dead()
 	#print("Dead items reprocessed...")
 
+def bamboodl_run():
 
-	#2 Spawn Fetch threads for everything, run through regular link list by date, seeing if wait time has been reached, and if so spawn a Fetch thread
-	from bambootil import subscribe
+	#
 	print("Preparing to check...")
 	check_imageboards()
-
 	print("Prepared to check...")
-	spawn_downloaders()
-	print("Downloaders spawned...")
 
-	#3 Wait for those threads to join again~
-	print("Running downloaders...")
+	#Spawn Fetch threads for everything, run through regular link list by date, seeing if wait time has been reached, and if so spawn a Fetch thread
+	print("Spawning worker threads...")
+	spawn_downloaders()
+	print("Workers spawned...")
+
+	#Wait for those threads to join again~
+	print("Waiting for workers to complete...")
 	from bambootil import total_json
-	while total_json:
+	while not query_download_queue_empty():
 		time.sleep(1)
 
-	#5 Save to disk
-	save_subscribe_object()
 
 
 #	#	#
 
 if __name__ == '__main__':
+	bamboodl_load()
 	bamboodl_run()
+
+	#Save to disk
+	save_subscribe_object()
 
 	exit()
 
