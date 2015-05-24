@@ -15,6 +15,7 @@ import os
 import concurrent.futures
 import re
 import threading
+import heapq
 from pathlib import Path
 from urllib import request
 from urllib.error import URLError, HTTPError
@@ -460,6 +461,109 @@ def spawn_downloaders():
 
 			#and 
 			pool.submit(downloaders[subscription['domain']],subscription)
+
+##
+#MISC
+##
+
+def generate_public_imageboard_index(imageboard_domain="8ch.net"):
+	global config
+
+	board_index = []
+
+	#Record the download path of the imageboard, as saved in the config file
+	#TODO: fix the config path situation, remove 'wip' and 'done', have just one download path per domain
+	index_path = Path(config["domains"][imageboard_domain]["default"]["download_wip"])
+
+	#For every board for this imageboard (for which we presumably have downloaded threads),
+	for boardname in os.listdir(str(index_path)):
+
+		#Record the board's path,
+		board_path = index_path / boardname
+
+		if not os.path.isdir(str(board_path)): continue
+
+		#Keep a list of all the threads inside,
+		thread_list = []
+
+		#For every thread on this board,
+		for threadnum in os.listdir(str(board_path)):
+
+			thread_path = board_path / str(threadnum)
+
+			#Record the thread's path,
+			if not os.path.isdir(str(thread_path)): continue
+
+			#If the thread has its JSON file,
+			if os.path.isfile(str(thread_path / 'thread.json')):
+
+				#Load the thread's JSON,
+				thread_json = j_load(board_path / str(threadnum) / 'thread.json')
+
+				#If there's something wrong with the thread, skip it
+				if thread_json == {}: continue
+
+				#Record the timestamp of the most recent post,
+				last_modified = thread_json['posts'][-1]['last_modified']
+
+				#Add it to the thread_list heap; this keeps the list sorted as we add items
+				heapq.heappush(thread_list, (last_modified, {'no':threadnum, 'last_modified':last_modified}))
+
+		#If there weren't any threads in the board, move on to the next board.
+		if len(thread_list) == 0: continue
+
+		#Add the board to the board index, with some naive assumptions
+		#TODO: Add more metadata
+		board_index.append({
+		"uri":boardname,
+		"title":"Welcome to /" + boardname + "/",
+		"subtitle":"This is a placeholder subtitle",
+		#"time":"2013-10-26 12:32:56",
+		"indexed":"1",
+		#"sfw":"0",
+		#"posts_total":0,
+		"locale":"English",
+		"tags":[]
+	})
+
+		blank_page = {"page":0, "threads":[]}
+
+		thread_index = []
+		thread_count = 0
+		page_num = 0
+		max_threads_per_page = 15
+
+		new_page = blank_page
+
+		#As long as there are more threads,
+		while len(thread_list) != 0:
+
+			#Add the most recently updated thread in the list to the current page,
+			new_page['threads'].append(thread_list.pop())
+			thread_count += 1
+
+			#If we've reached the maximum number of threads per page for this board,
+			if thread_count >= max_threads_per_page:
+
+				#Add the page to the board index,
+				thread_index.append(new_page)
+
+				#Increment our page number, resetting the thread count,
+				page_num += 1
+				thread_count = 0
+
+				#And create a new blank page, ready for more threads
+				new_page = blank_page
+				new_page['page'] = page_num
+
+			#Otherwise, if the threadlist runs empty, and the above block didn't just run, we want to make sure the last page of threads is added
+			else: thread_index.append(new_page)
+
+		#Save the index to disk
+		j_save(board_path / "threads.json", thread_index)
+
+	#And when all the boards have been looked at, 
+	j_save(index_path / "boards.json", board_index)
 
 
 #	#	#

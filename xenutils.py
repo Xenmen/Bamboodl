@@ -120,11 +120,9 @@ def j_save(path, data):
 #TIME
 ##
 
-def current_time():
-	return time.time()
+def current_time(): return time.time()
 
-def sleep_for(wait_time):
-	time.sleep(wait_time)
+def sleep_for(wait_time): time.sleep(wait_time)
 
 ##
 #UNICODE HANDLING
@@ -213,3 +211,12 @@ def extract_article(page_soup, target_tag, targed_id):
 	for node in page_soup.findChildren(name=target_tag, attrs={'id':targed_id}):
 		return node
 	return None
+
+##
+#MISC UTILITY
+##
+
+def save_pretty_json(url, filepath): j_save(filepath, json.loads(download_html(url)))
+
+#	#	#
+

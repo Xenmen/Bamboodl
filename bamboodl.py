@@ -9,8 +9,7 @@
 ##
 #Python STD
 ##
-import json
-import time, datetime
+import json, os, datetime
 from urllib.parse import urlparse
 from urllib import request
 
@@ -70,13 +69,17 @@ def bamboodl_run():
 	print("Waiting for workers to complete...")
 	from bambootil import total_json
 	while not query_download_queue_empty():
-		time.sleep(1)
+		sleep_for(1)
 
 
 
 #	#	#
 
 if __name__ == '__main__':
+
+	print("Welcome", os.getlogin())
+	print("\n")
+
 	bamboodl_load()
 	bamboodl_run()
 
