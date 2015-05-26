@@ -218,5 +218,13 @@ def extract_article(page_soup, target_tag, targed_id):
 
 def save_pretty_json(url, filepath): j_save(filepath, json.loads(download_html(url)))
 
+def save_pretty_html(url, filepath):
+
+	with open(str(filepath), 'w') as file_out:
+		mysoup = download_soup(url)
+		new_text = strip_unicode(mysoup.prettify())
+
+		file_out.write(new_text)
+
 #	#	#
 
