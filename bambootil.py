@@ -50,58 +50,59 @@ def init_user_subscribe_list():
 	j_save(paths['path_subscribe'], subscribe)
 
 def load_subscribe_object():
-	global paths, subscribe
+	global paths, subscribe, subscribe_threadlock
 
-	if paths['path_subscribe'].exists():
-		#print("\n\n\nLOADINGGGGG")
-		subscribe = j_load(paths['path_subscribe'])
-	else:
-		init_user_subscribe_list()
+	with subscribe_threadlock:
 
-	#Fix the missing 'dead' record that early users of Bamboodl suffered.
-	#TODO: Remove this in a month or two when everybody's upgraded.
-	if 'dead' not in subscribe:
-		subscribe['dead'] = []
+		if paths['path_subscribe'].exists():
+			#print("\n\n\nLOADINGGGGG")
+			subscribe = j_load(paths['path_subscribe'])
+		else:
+			init_user_subscribe_list()
 
-	debug("\n\n\t###\t\t\t###\n\tSubscriptions Object Loaded\n\t###\t\t\t###\n")
+		debug("\n\n\t###\t\t\t###\n\tSubscriptions Object Loaded\n\t###\t\t\t###\n")
 
 def save_subscribe_object():
-	global paths, subscribe
+	global paths, subscribe, subscribe_threadlock
 
-	debug("\n\n\t###\t\t\t###\n\tSubscriptions Object Saved\n\t###\t\t\t###\n")
-	j_save(paths['path_subscribe'], subscribe)
+	with subscribe_threadlock:
+
+		debug("\n\n\t###\t\t\t###\n\tSubscriptions Object Saved\n\t###\t\t\t###\n")
+		j_save(paths['path_subscribe'], subscribe)
 
 def add_json_to_subscribe(new_json):
-	global subscribe, domains_imageboards
+	global subscribe, domains_imageboards, subscribe_threadlock
 
-	domain = new_json['domain']
-	if domain not in subscribe:
-		subscribe[domain] = {}
-	if domain in domains_imageboards:
-		board=new_json['board']
-		thread=new_json['thread']
-		if board not in subscribe[domain]:
-			subscribe[domain][board] = {}
-		if thread not in subscribe[domain][board]:
-			subscribe[domain][board][thread] = new_json
-			return("Now subscribed to: " + new_json['url'])
-		else:
-			return("URL already watched...")
-	#TODO
-	#elif domain == dom_tumblr or domain == dom_deviantart or domain == dom_newgrounds or domain == dom_furaffinity or domain == dom_inkbunny:
-	else:
-		account = new_json['account']
-		if account not in subscribe[domain]:
-			if 'tags' in new_json and new_json['tags'][0] == '':
-				new_json['tags'] = []
-			subscribe[domain][account] = new_json
-			return("Now subscribed to: " + new_json['url'])
-		else:
-			if 'tags' in new_json and new_json['tags'][0] not in subscribe[domain][account]['tags']:
-				subscribe[domain][account]['tags'].append(new_json['tags'][0])
-				return("URL already watched, but new tag added...")
+	with subscribe_threadlock:
+
+		domain = new_json['domain']
+		if domain not in subscribe:
+			subscribe[domain] = {}
+		if domain in domains_imageboards:
+			board=new_json['board']
+			thread=new_json['thread']
+			if board not in subscribe[domain]:
+				subscribe[domain][board] = {}
+			if thread not in subscribe[domain][board]:
+				subscribe[domain][board][thread] = new_json
+				return("Now subscribed to: " + new_json['url'])
 			else:
-				return("URL and tags already watched...")
+				return("URL already watched...")
+		#TODO
+		#elif domain == dom_tumblr or domain == dom_deviantart or domain == dom_newgrounds or domain == dom_furaffinity or domain == dom_inkbunny:
+		else:
+			account = new_json['account']
+			if account not in subscribe[domain]:
+				if 'tags' in new_json and new_json['tags'][0] == '':
+					new_json['tags'] = []
+				subscribe[domain][account] = new_json
+				return("Now subscribed to: " + new_json['url'])
+			else:
+				if 'tags' in new_json and new_json['tags'][0] not in subscribe[domain][account]['tags']:
+					subscribe[domain][account]['tags'].append(new_json['tags'][0])
+					return("URL already watched, but new tag added...")
+				else:
+					return("URL and tags already watched...")
 
 def load_newsubs():
 	global subscribe, paths, key_regex, key_reg_replace
@@ -193,18 +194,21 @@ def fetch_l2_json(domain, board):
 		watch_subscription_or_dont(subscribe[domain][board][item])
 
 def check_imageboards():
-	global subscribe, total_json, domains_imageboards
+	global subscribe, total_json, domains_imageboards, domains_imageboards_json_capable
 
-	for key in domains_imageboards:
+	#for key in domains_imageboards:
+	for key in domains_imageboards_json_capable:
 		if key in subscribe:
 			for board in subscribe[key]:
 				fetch_l2_json(key, board)
 
 def check_everything():
-	global subscribe, total_json, domains_imageboards
+	global subscribe, total_json, domains_imageboards, domains_imageboards_json_capable
 
 	one_layer = ['tumblr.com', 'newgrounds.com', 'deviantart.com']
-	two_layer = domains_imageboards
+	#two_layer = domains_imageboards
+	two_layer = domains_imageboards_json_capable
+	
 
 	for key in one_layer:
 		if key in subscribe:
@@ -262,9 +266,12 @@ def chandl(subscription):
 
 		#If dead, add it to the newly dead thread list,
 		with checked_threads_threadlock:
-			if str(subscription['thread']) in subscribe[domain][subscription['board']]:
+			if subscription['thread'] in subscribe[domain][subscription['board']]:
 				print("\tDead thread: " + domain + ", board " + subscription['board'] + ":" + str(subscription['thread']) + ".")
 				scratch = subscribe[domain][subscription['board']].pop(str(subscription['thread']))
+				
+				subscribe["dead"].append(scratch)
+
 				if item['thread'] in subscribe[domain][subscription['board']]:
 					print("Something is TERRIBLY WRONG")
 
@@ -303,6 +310,9 @@ def chandl(subscription):
 					if str(subscription['thread']) in subscribe[domain][subscription['board']]:
 						print("\tDead thread: " + domain + ", board " + subscription['board'] + ":" + str(subscription['thread']) + ".")
 						scratch = subscribe[domain][subscription['board']].pop(str(subscription['thread']))
+						
+						subscribe["dead"].append(scratch)
+
 						if item['thread'] in subscribe[domain][subscription['board']]:
 							print("Something is TERRIBLY WRONG")
 				return
@@ -391,7 +401,7 @@ def chandl(subscription):
 	}[domain].replace('<board>', subscription['board'])
 
 	#8/b/ media links are weird, they're not on the media.8ch.net subdomain, but right on 8ch.net...
-	if domain == dom_8chan and subscription['board'] in ['b', 'sp', 'v', 'pol']:
+	if domain == dom_8chan and subscription['board'] in ['b', 'meta', 'sp', 'v', 'pol']:
 		#print("8/b/ thread detected")
 		media_temp_path = media_temp_path.replace('media.', '')
 

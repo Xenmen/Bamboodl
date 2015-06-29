@@ -86,6 +86,7 @@ class Dialog(QDialog):
 		self.createMenu()
 
 		self.widget_register_url()
+		self.widget_reprocess_dead()
 		self.widget_download()
 		self.thread_download = threading.Thread( group=None, target=self.run_downloader, name=None, args=(), kwargs={}, daemon=True )
 		self.running = False
@@ -103,6 +104,7 @@ class Dialog(QDialog):
 		mainLayout.setMenuBar(self.menuBar)
 
 		mainLayout.addWidget(self.form_register_url)
+		mainLayout.addWidget(self.form_reprocess_dead)
 		mainLayout.addWidget(self.form_download_urls)
 
 		self.setLayout(mainLayout)
@@ -175,6 +177,8 @@ class Dialog(QDialog):
 				#Otherwise, blank it.
 				else:
 					self.set_label_text_register("Enter URLs here and press 'Register' to add them to your subscriptions.")
+
+				save_subscribe_object()
 					
 			else:
 				if domain == None:
@@ -196,6 +200,23 @@ class Dialog(QDialog):
 		self.form_register_url.setLayout(layout)
 
 	##
+	#Registering a new URL
+	##
+
+	def click_reprocess_dead(self):
+
+		reprocess_the_dead()
+
+	def widget_reprocess_dead(self):
+		self.form_reprocess_dead = QGroupBox("Add dead threads to the current download list to recheck them")
+		layout = QFormLayout()
+
+		self.button_reprocess_dead = self.createButton("Reprocess Dead Threads", self.click_reprocess_dead)
+		layout.addRow(self.button_reprocess_dead)
+
+		self.form_reprocess_dead.setLayout(layout)
+
+	##
 	#Running Bamboodl Update
 	##
 
@@ -215,6 +236,7 @@ class Dialog(QDialog):
 		check_imageboards()
 		self.append_label_text_download("Downloading. . .")
 		spawn_downloaders()
+		save_subscribe_object()
 		self.append_label_text_download("Done downloading.")
 
 		self.running = False
@@ -252,9 +274,12 @@ if __name__ == '__main__':
 	#1 Load subscription object
 	load_subscribe_object()
 
+	print("opening QT")
 	app = QApplication(sys.argv)
+	print("opening window")
 	dialog = Dialog()
 
+	print("executing")
 	dialog.exec_()
 
 

@@ -168,7 +168,7 @@ def download_html(src):
 
 	try:
 		#Download the webpage and parse it nicely
-		with urlopen(Request(src,headers={"User-Agent": "Mozilla 5.0"}),timeout=10) as resp:
+		with urlopen(Request(src,headers={"User-Agent": "Mozilla 5.0"}),timeout=300) as resp:
 			debug_v("Downloading " + src)
 			html = resp.read().decode('utf-8')
 			return html
@@ -198,7 +198,7 @@ def dlfile(src,filename):
 			debug_v("Finished " + src)
 	except (IOError,OSError) as error:
 		print("File Error:",error)
-		#debug("URL was: " + src)
+		debug("URL was: " + src)
 		#debug("Path was: " + filename)
 	except socket.timeout:
 		print("File",src,"timed out")

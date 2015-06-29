@@ -21,6 +21,9 @@ from threading import BoundedSemaphore
 
 from xenutils import confirm_path, j_save, j_load
 
+
+#	#	#
+
 ##
 #VARIABLES
 ##
@@ -233,8 +236,8 @@ load_user_settings()
 reg_start=r"(?:https?:\/\/)?(?:www\.)?"
 
 key_regex = {
-	dom_4chan:reg_start+r"boards\." + dom_4chan + r"/(\w+)/thread/([0-9]+)((?:\.json)|/?(?:/[a-zA-Z0-9-]*))?(?:#q?[0-9]+)?",
-	dom_8chan:reg_start+r"8ch.net/([a-zA-Z0-9-+]*)/res/?([0-9]+)(?:(?:.html)|(?:.json))(?:#q?[0-9]+)?",
+	dom_4chan:reg_start+r"boards\." + dom_4chan + r"/(\w+)/thread/([0-9]+)((?:\.json)|/?(?:/[a-zA-Z0-9-]*))?(?:#p?q?[0-9]+)?",
+	dom_8chan:reg_start+r"8ch.net(?:/mod\.php\?)?/([a-zA-Z0-9-+]*)/res/?([0-9]+)(?:(?:.html)|(?:.json))(?:#q?[0-9]+)?",
 	dom_wizchan:reg_start+r"wizchan.org/([a-zA-Z0-9-+]*)/res/?([0-9]+)(?:(?:.html)|(?:.json))(?:#q?[0-9]+)?",
 	dom_lainchan:reg_start+r"lainchan.org/([a-zA-Z0-9-+]*)/res/?([0-9]+)(?:(?:.html)|(?:.json))(?:#q?[0-9]+)?",
 	dom_tumblr:reg_start+r"([a-zA-Z0-9-]*)\." + dom_tumblr + "\/?(?:tagged\/)?([a-zA-Z0-9-_+=#]*)",
